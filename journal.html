@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal · APM Trading Desk</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background:#0d0d0d; color:#ffffff;
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+         padding: 24px 20px 60px; }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header .sub { color: #c3c2b7; font-size: 13px; margin: 2px 0 12px; }
+  nav { display:flex; gap:6px; flex-wrap:wrap; border-bottom:1px solid #2c2c2a;
+        padding-bottom:12px; }
+  nav a { color:#c3c2b7; text-decoration:none; font-size:13px; font-weight:600;
+          padding:6px 12px; border-radius:7px; border:1px solid rgba(255,255,255,0.10); }
+  nav a:hover { color:#ffffff; background:#1a1a19; }
+  nav a.on { color:#ffffff; background:#1a1a19; border-color:#383835; }
+  .grid { display: grid; gap: 14px; margin-top: 16px;
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+  details.card, .card { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
+          border-radius:10px; padding:16px 18px; overflow:hidden; }
+  details.card > summary { cursor:pointer; list-style:none; font-size:13px;
+          font-weight:600; color:#c3c2b7; text-transform:uppercase;
+          letter-spacing:.4px; user-select:none; }
+  details.card > summary::before { content:"▸ "; color:#898781; }
+  details.card[open] > summary::before { content:"▾ "; }
+  details.card > summary::-webkit-details-marker { display:none; }
+  details.card[open] > summary { margin-bottom:10px; }
+  .card h2 { font-size:13px; font-weight:600; color:#c3c2b7;
+             text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px; }
+  .legend { font-size:12px; color:#898781; margin:-2px 0 8px; }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:50%;
+         margin-right:5px; }
+  .tiles { display:grid; gap:14px; margin-top:16px;
+           grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); }
+  .tile { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
+          border-radius:10px; padding:14px 16px; }
+  .tlabel { font-size:11px; color:#898781; text-transform:uppercase;
+            letter-spacing:.4px; }
+  .tval { font-size:26px; font-weight:700; margin-top:3px; }
+  .tval.pos { color:#0ca30c; } .tval.neg { color:#d03b3b; }
+  .tsub { font-size:12px; color:#c3c2b7; margin-top:2px; }
+  svg.lc { width:100%; height:auto; display:block; }
+  .chip { display:inline-block; min-width:30px; text-align:center;
+          padding:4px 6px; margin:0 4px 4px 0; border-radius:6px;
+          font-size:12px; font-weight:700; cursor:default; }
+  .gate-row { display:grid; grid-template-columns: 1fr 2fr auto; gap:10px;
+              align-items:center; margin-bottom:9px; font-size:13px; }
+  .gate-label { color:#c3c2b7; }
+  .gate-track { height:10px; background:#2c2c2a; border-radius:5px; }
+  .gate-fill { height:10px; border-radius:5px; min-width:2px; }
+  .gate-val { color:#c3c2b7; font-variant-numeric:tabular-nums;
+              white-space:nowrap; }
+  .gate-val.met { color:#0ca30c; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; color:#898781; font-weight:600; font-size:11px;
+       text-transform:uppercase; letter-spacing:.4px; padding:4px 8px 6px 0; }
+  td { padding:5px 8px 5px 0; border-top:1px solid #2c2c2a; vertical-align:top; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  td.num.pos { color:#0ca30c; } td.num.neg { color:#d03b3b; }
+  .tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:9px;
+         letter-spacing:.4px; }
+  .tag.live { background:#3987e5; color:#fff; }
+  .tag.paper { background:#d95926; color:#fff; }
+  .muted { color:#898781; }
+  ul.research { padding-left:18px; }
+  ul.research li { margin-bottom:10px; font-size:14px; color:#c3c2b7; }
+  article.entry { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
+          border-radius:10px; padding:18px 20px; margin-top:16px; }
+  article.entry h3 { font-size:15px; margin-bottom:2px; }
+  article.entry .meta { font-size:12px; color:#898781; margin-bottom:10px; }
+  article.entry p { margin:0 0 12px; color:#c3c2b7; font-size:14px; }
+  footer { margin-top:26px; color:#898781; font-size:12px; }
+  #tip { position:fixed; pointer-events:none; background:#1a1a19;
+         border:1px solid rgba(255,255,255,0.10); border-radius:7px; padding:6px 10px;
+         font-size:12px; color:#ffffff; opacity:0; z-index:9;
+         box-shadow:0 4px 14px rgba(0,0,0,.5); font-variant-numeric:tabular-nums; }
+  .span2 { grid-column: 1 / -1; }
+</style></head><body><div class="wrap">
+<header>
+  <h1>APM Trading Desk</h1>
+  <div class="sub">Futures day-trading journal — public process record.
+  Rebuilt 2026-08-12 10:55 UTC · trader day 43. Paper and live are tracked side by side
+  and <b>never pooled</b>; paper P&L is net of commission where reconciled.</div>
+  <nav><a href="index.html">Overview</a><a href="journal.html" class=on>Journal</a><a href="trades.html">Trades</a><a href="research.html">Research</a><a href="agent.html">Agent Lab</a></nav>
+</header>
+<div class="card" style="margin-top:16px"><h2>The daily journal</h2><div class="legend">Verbatim mirror of the end-of-day posts from the X feed, newest first — grades score process, never P&L. Chart images live on the X thread.</div></div><article class="entry"><h3>2026-08-11 <span class="chip" style="background:#6da7ec;color:#0b0b0b">C</span></h3><div class="meta">Grade C · 3 clean / 7 flawed</div><p>Tue 08-11 — Day 42 (Week 6) of the journey. Process grade: C. 10 trades, 3 clean / 7 flawed. Paper account (TV $10k lab, day 2 of the period): −$49.40, balance $9,950.60. Not real money — tracked in full, never mixed with the real ledger.</p><p>Busiest, choppiest session of the paper period so far. Ten round trips across gold (MGC), crude (MCL) and Nasdaq micros (MNQ), three first-time uses of TradingView&#x27;s reverse-position button, two entries I flat-out called impulsive on tape, and one trade I closed with an admission I wasn&#x27;t proud of: &quot;I did that thing where I know it&#x27;s not real money, so I&#x27;m just doing stuff.&quot; That&#x27;s the leak this whole paper period exists to catch — and it caught it.</p><p>Trade-by-trade:</p><p>Started with a gold long off a 15-minute predictive read into the open. Filled, then I mechanized a rule mid-trade (if I&#x27;m risking more than $50, I have to declare a manual invalidation and sit through it) and followed it exactly on the close. Lost $66. Clean process, first loss of the day, no complaints.</p><p>Then the day&#x27;s worst decision: added a second gold contract before the first one had even hit its own stop. Self-caught it in real time — &quot;the real mistake here was adding another contract before my first one got stopped out&quot; — and then lost track of my own standing invalidation rule on top of it. Two leaks stacked into one trade, and it cost the most: $114.</p><p>A crude scalp broke even. A gold short I lost confidence in got closed out using TradingView&#x27;s reverse-position button for the first time — a feature I&#x27;d never touched before today, and I ended up leaning on it three separate times this session instead of a clean stop exit.</p><p>The one genuinely good trade of the day: a crude long off a real fair-value-gap retest, where I only raised my stop after price actually printed a fresh swing low — textbook, no shortcuts. Small win, +$5, but it&#x27;s the trade that needed zero correction after the fact.</p><p>The rest of the afternoon was rougher. A breakout entry I called &quot;impulse&quot; on tape before it even resolved. A small MNQ scalp that stopped out clean. And then, closing out the real trading for the day, a gold long where I heard myself say the quiet part out loud: not real money, so I was just doing stuff. Closed it for a small loss and sat with that admission.</p><p>Here&#x27;s the part I actually want on the record: the exact same &quot;it&#x27;s paper, might as well&quot; urge showed back up about two hours later, late in the session, on a fresh setup. This time I didn&#x27;t take the bait. &quot;I could, it&#x27;s paper. But I don&#x27;t want to get in the habit of that.&quot; No trade. That&#x27;s the whole point of doing this on paper first — not to avoid the leak, but to catch it enough times that it stops showing up when the money is real again.</p><p>One honest flag on the numbers: today&#x27;s trade log came in as a screen-recording video instead of a screenshot for the first time. Every fill&#x27;s price and side checks out against the order table, but my per-trade math on today&#x27;s losses doesn&#x27;t quite reconcile with what the account itself is reporting. Working on closing that gap — wanted to be upfront about it rather than paper over a number I&#x27;m not 100% sure of.</p><p>Tomorrow&#x27;s focus is mine, not assigned: run a full hourly-down-to-15-minute read before the open instead of discovering the structure live while trading it. Less lost in the weeds, more plan going in.</p><p>Process over P&amp;L. No signals, just the record.</p></article><article class="entry"><h3>2026-08-10 <span class="chip" style="background:#1c5cab;color:#ffffff">A-</span></h3><div class="meta">Grade A- · 9 clean / 2 flawed</div><p>Day 41. Grade A- (9 clean / 2 flawed, 11 trades). Two accounts today, kept separate on purpose: real Webull -$30.63, and the first session of a new ~2-week paper period on TradingView ($10k reset), +$287.20 there. Neither number is the point today -- the process is.</p><p>I started the morning on my real account like normal. Three MES trades before I switched over:</p><p>Trade 1 (9:34-9:52, +$1): Took a limit long after a 9 EMA cross over the overnight high and a reclaim of the 15m 20/50 EMAs, aiming at a retest into the overnight high. Price moved my way, I moved my stop to breakeven using the 15m wicks as a shield, and got stopped for a clean scratch instead of giving the move back.</p><p>Trade 2 (10:15-10:20, -$11): 15m candle failed to close back above a break-of-structure level, so I went market short exactly like I said I would if that happened. My invalidation was a 5m close back above that structure -- it triggered, I got out on time, no hesitation. Down $10 on the day after this one, and I said so on tape in the moment.</p><p>Trade 3 (11:06-11:15, -$20): Limit long off a VWAP point-of-control reclaim, aiming at the overnight high again. This is the one I&#x27;ll actually flag: I wasn&#x27;t watching my screen exactly when my invalidation triggered, so I closed a little late. The honest silver lining -- my actual exit still landed better than where my hard stop was sitting, so the late reaction cost me less than it could have. Down $30 on the day, two losses in a row, said plainly on tape.</p><p>That&#x27;s where the real account closed for the day. Then I switched to paper -- first trade of the new period -- and started trying instruments I don&#x27;t normally touch: gold (MGC), Nasdaq micros (MNQ), crude (MCL).</p><p>MGC long #1 (-$32): entry on a market long at a point of interest, less than 1:1 reward-to-risk by my own read going in. Got stopped out. My stop ended up tighter than what I&#x27;d originally set and I honestly don&#x27;t have a clean recording of exactly when or why I moved it -- logging that gap instead of pretending I remember.</p><p>MGC long #2 (+$100): clean bracket, entry and target both declared up front, walked away, target hit exactly as planned. Best trade of the day.</p><p>MGC long #3 (+$72): a reentry on a retest, and I consciously lowered my target from where I&#x27;d first planned it because I could see real resistance overhead. Moved the bracket, but for a real, stated reason.</p><p>MNQ short (+$112): a two-minute scalp, sized my stop down to my actual risk tolerance right at entry. Target hit clean. Second-best trade of the day.</p><p>MNQ long #1 (-$11): stopped out almost exactly where my bracket said it would.</p><p>MNQ long #2 (+$38): another scalp, moved my target to a more realistic level before it filled, for a stated reason (a contested wick zone overhead).</p><p>MNQ long #3 (+$7): this is the other one I&#x27;m flagging. My recording appears to have cut out before I actually closed this trade -- I&#x27;ve got the entry logic on tape, I don&#x27;t have the exit. Small win, but I can&#x27;t tell you why I took it when I did. Logging the gap honestly rather than making something up.</p><p>MCL long (+$14): and here&#x27;s the one that matters most today, honestly. I said it out loud AT ENTRY: &quot;it is what it is, this is paper, so we&#x27;re gonna chase... this is a trade I should not have taken.&quot; That&#x27;s on tape, unprompted. I didn&#x27;t take it because I had a real reason -- I took it because it&#x27;s not real money. But once I was in it, I managed it well: trailed my stop up as it worked in my favor, and took a small profit instead of pressing a trade I already knew was a bad idea. Good process AFTER a bad decision doesn&#x27;t erase the bad decision, and I&#x27;m not going to pretend it does.</p><p>The lesson for today isn&#x27;t about any one trade -- it&#x27;s the pattern underneath the MCL trade. I&#x27;m calling it &quot;paper permission&quot;: using the fact that it&#x27;s not real money as license to skip being selective, instead of using this period to actually find out what selective looks like for me. The whole point of trading paper right now is building real receipts on what works for me across instruments I don&#x27;t normally trade. If &quot;it doesn&#x27;t count&quot; becomes my excuse to stop being picky, I&#x27;ve defeated the purpose before I&#x27;ve even started. Watching for this one closely over the next couple weeks.</p></article><article class="entry"><h3>2026-08-07 <span class="chip" style="background:#256abf;color:#ffffff">B+</span></h3><div class="meta">Grade B+ · 3 clean / 1 flawed</div><p>Friday close: 3 MES longs, all small stop-outs, -$93.13. Called it for the day AND the week rather than fight a choppy open. Grade: B+ (2 clean / 1 flawed). 🧵</p><p>08:46-09:00: stated invalidation (5m close below overnight low), watched it live, closed exactly on the rule. -$23, called the size before it printed.</p><p>10:00-11:30: same discipline at entry, but held past my own stop hoping it would turn back. Caught myself mid-trade, closed late anyway. -$59, the day&#x27;s biggest.</p><p>11:53-12:00: last-attempt VWAP retest, honored the invalidation exactly. -$11. Then: 3 losers into chop is enough. Done for the day, done for the week.</p><p>The lesson: honor the invalidation the moment it fires -- I said the right thing out loud while still in the trade and still didn&#x27;t act on it fast enough. Watching for the repeat.</p></article><article class="entry"><h3>2026-08-06 <span class="chip" style="background:#3987e5;color:#ffffff">B-</span></h3><div class="meta">Grade B- · 8 clean / 1 flawed</div><p>Day 4 of journaling: 9 trades across MES/MNQ/MGC, 8 clean, 1 flawed, −$194.54.</p><p>Ugly number, decent process — and the one flaw uncovered a brand-new leak in my game. Trade-by-trade below. 🧵</p><p>The tape, part 1: MNQ +$2 regime-turn scalp. An orphaned stop cost $4 (op error — rule written). MES −$36, stopped in chop while stuck on a work call — the stop did its job. MES +$20, proactive exit on a regime flip before price confirmed. Best trade of the day.</p><p>Part 2: MNQ −$78, pullback long entered late — pre-stated invalidation triggered, followed it exactly. MNQ −$7, self-flagged as early going in, honored the rule anyway. MGC −$5, playbook trade — had a plan for momentum, no plan for stall. Real gap, logged.</p><p>The flawed one: MGC short −$47, taken while already down $147 without rechecking my remaining daily risk budget. Breached my $175 loss line by $20. New leak, named: running-total blindness. Tomorrow&#x27;s drill: new position, new number — check the total before the order.</p></article>
+<footer>Process over P&L. Auto-generated daily from the trading journal —
+no hand-edited numbers. Sim results are labeled sim everywhere; nothing here
+is financial advice or a signal.</footer>
+</div></body></html>

@@ -8,20 +8,33 @@
   * { box-sizing: border-box; margin: 0; }
   body { background:#0d0d0d; color:#ffffff;
          font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
-         padding: 28px 20px 60px; }
+         padding: 24px 20px 60px; }
   .wrap { max-width: 1180px; margin: 0 auto; }
   header h1 { font-size: 22px; font-weight: 700; }
-  header .sub { color: #c3c2b7; font-size: 13px; margin-top: 2px; }
-  .grid { display: grid; gap: 14px; margin-top: 18px;
+  header .sub { color: #c3c2b7; font-size: 13px; margin: 2px 0 12px; }
+  nav { display:flex; gap:6px; flex-wrap:wrap; border-bottom:1px solid #2c2c2a;
+        padding-bottom:12px; }
+  nav a { color:#c3c2b7; text-decoration:none; font-size:13px; font-weight:600;
+          padding:6px 12px; border-radius:7px; border:1px solid rgba(255,255,255,0.10); }
+  nav a:hover { color:#ffffff; background:#1a1a19; }
+  nav a.on { color:#ffffff; background:#1a1a19; border-color:#383835; }
+  .grid { display: grid; gap: 14px; margin-top: 16px;
           grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
-  .card { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
+  details.card, .card { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
           border-radius:10px; padding:16px 18px; overflow:hidden; }
+  details.card > summary { cursor:pointer; list-style:none; font-size:13px;
+          font-weight:600; color:#c3c2b7; text-transform:uppercase;
+          letter-spacing:.4px; user-select:none; }
+  details.card > summary::before { content:"▸ "; color:#898781; }
+  details.card[open] > summary::before { content:"▾ "; }
+  details.card > summary::-webkit-details-marker { display:none; }
+  details.card[open] > summary { margin-bottom:10px; }
   .card h2 { font-size:13px; font-weight:600; color:#c3c2b7;
              text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px; }
-  .card .legend { font-size:12px; color:#898781; margin:-4px 0 8px; }
+  .legend { font-size:12px; color:#898781; margin:-2px 0 8px; }
   .dot { display:inline-block; width:8px; height:8px; border-radius:50%;
-         margin-right:5px; vertical-align:baseline; }
-  .tiles { display:grid; gap:14px; margin-top:18px;
+         margin-right:5px; }
+  .tiles { display:grid; gap:14px; margin-top:16px;
            grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); }
   .tile { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
           border-radius:10px; padding:14px 16px; }
@@ -39,14 +52,13 @@
   .gate-label { color:#c3c2b7; }
   .gate-track { height:10px; background:#2c2c2a; border-radius:5px; }
   .gate-fill { height:10px; border-radius:5px; min-width:2px; }
-  .gate-val { color:#c3c2b7; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .gate-val { color:#c3c2b7; font-variant-numeric:tabular-nums;
+              white-space:nowrap; }
   .gate-val.met { color:#0ca30c; }
-  .gicon { font-weight:700; }
   table { width:100%; border-collapse:collapse; font-size:13px; }
   th { text-align:left; color:#898781; font-weight:600; font-size:11px;
        text-transform:uppercase; letter-spacing:.4px; padding:4px 8px 6px 0; }
-  td { padding:5px 8px 5px 0; border-top:1px solid #2c2c2a;
-       vertical-align:top; }
+  td { padding:5px 8px 5px 0; border-top:1px solid #2c2c2a; vertical-align:top; }
   td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
   td.num.pos { color:#0ca30c; } td.num.neg { color:#d03b3b; }
   .tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:9px;
@@ -54,31 +66,30 @@
   .tag.live { background:#3987e5; color:#fff; }
   .tag.paper { background:#d95926; color:#fff; }
   .muted { color:#898781; }
-  ul.research { padding-left:18px; } ul.research li { margin-bottom:8px;
-    font-size:13px; color:#c3c2b7; }
+  ul.research { padding-left:18px; }
+  ul.research li { margin-bottom:10px; font-size:14px; color:#c3c2b7; }
+  article.entry { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
+          border-radius:10px; padding:18px 20px; margin-top:16px; }
+  article.entry h3 { font-size:15px; margin-bottom:2px; }
+  article.entry .meta { font-size:12px; color:#898781; margin-bottom:10px; }
+  article.entry p { margin:0 0 12px; color:#c3c2b7; font-size:14px; }
   footer { margin-top:26px; color:#898781; font-size:12px; }
   #tip { position:fixed; pointer-events:none; background:#1a1a19;
          border:1px solid rgba(255,255,255,0.10); border-radius:7px; padding:6px 10px;
          font-size:12px; color:#ffffff; opacity:0; z-index:9;
-         box-shadow:0 4px 14px rgba(0,0,0,.5);
-         font-variant-numeric:tabular-nums; }
+         box-shadow:0 4px 14px rgba(0,0,0,.5); font-variant-numeric:tabular-nums; }
   .span2 { grid-column: 1 / -1; }
 </style></head><body><div class="wrap">
 <header>
   <h1>APM Trading Desk</h1>
   <div class="sub">Futures day-trading journal — public process record.
-  Rebuilt 2026-08-12 05:12 UTC · trader day 43.
-  Paper and live are tracked side by side and <b>never pooled</b>.</div>
+  Rebuilt 2026-08-12 10:55 UTC · trader day 43. Paper and live are tracked side by side
+  and <b>never pooled</b>; paper P&L is net of commission where reconciled.</div>
+  <nav><a href="index.html" class=on>Overview</a><a href="journal.html">Journal</a><a href="trades.html">Trades</a><a href="research.html">Research</a><a href="agent.html">Agent Lab</a></nav>
 </header>
-
-<div class="tiles"><div class="tile"><div class="tlabel">Trader age</div><div class="tval ">day 43</div><div class="tsub">week 7</div></div><div class="tile"><div class="tlabel">Latest card</div><div class="tval ">C</div><div class="tsub">2026-08-11 · 3 clean / 7 flawed</div></div><div class="tile"><div class="tlabel">Clean rate (14 cards)</div><div class="tval ">63%</div><div class="tsub">52 clean / 31 flawed</div></div><div class="tile"><div class="tlabel">Last live day</div><div class="tval neg">-30.63</div><div class="tsub">2026-08-10</div></div><div class="tile"><div class="tlabel">Last paper-lab day</div><div class="tval neg">-336.60</div><div class="tsub">2026-08-11 · sim</div></div></div>
-
+<div class="tiles"><div class="tile"><div class="tlabel">Trader age</div><div class="tval ">day 43</div><div class="tsub">week 7</div></div><div class="tile"><div class="tlabel">Latest card</div><div class="tval ">C</div><div class="tsub">2026-08-11 · 3 clean / 7 flawed</div></div><div class="tile"><div class="tlabel">Clean rate (14 cards)</div><div class="tval ">63%</div><div class="tsub">52 clean / 31 flawed</div></div><div class="tile"><div class="tlabel">Last live day</div><div class="tval neg">-30.63</div><div class="tsub">2026-08-10</div></div><div class="tile"><div class="tlabel">Last paper-lab day</div><div class="tval neg">-336.60</div><div class="tsub">2026-08-11 · sim, net of commission</div></div></div>
 <div class="grid">
-  <div class="card">
-    <h2>Live account — cumulative P&L ($)</h2>
-    <div class="legend"><span class="dot" style="background:#3987e5"></span>
-      real-money trades from the journal ledger (closed trades only)</div>
-    <svg viewBox="0 0 560 220" class="lc" id="lc-live" data-pts="{&quot;days&quot;: [&quot;2026-07-24&quot;, &quot;2026-07-27&quot;, &quot;2026-07-28&quot;, &quot;2026-07-29&quot;, &quot;2026-07-30&quot;, &quot;2026-07-31&quot;, &quot;2026-08-04&quot;, &quot;2026-08-05&quot;, &quot;2026-08-06&quot;, &quot;2026-08-07&quot;, &quot;2026-08-10&quot;], &quot;vals&quot;: [-192.0, -173.67, 82.37, -52.84, -165.77, 8.36, -44.56, 61.76, -132.78, -246.12, -276.75], &quot;pl&quot;: 46, &quot;iw&quot;: 436, &quot;pt&quot;: 14, &quot;ih&quot;: 180, &quot;lo&quot;: -276.75, &quot;hi&quot;: 82.37, &quot;color&quot;: &quot;#3987e5&quot;}"
+  <details class="card" open><summary>Live account — cumulative P&L ($)</summary><div class="legend"><span class="dot" style="background:#3987e5"></span>real-money trades from the journal ledger (closed trades only)</div><svg viewBox="0 0 560 220" class="lc" id="lc-live" data-pts="{&quot;days&quot;: [&quot;2026-07-24&quot;, &quot;2026-07-27&quot;, &quot;2026-07-28&quot;, &quot;2026-07-29&quot;, &quot;2026-07-30&quot;, &quot;2026-07-31&quot;, &quot;2026-08-04&quot;, &quot;2026-08-05&quot;, &quot;2026-08-06&quot;, &quot;2026-08-07&quot;, &quot;2026-08-10&quot;], &quot;vals&quot;: [-192.0, -173.67, 82.37, -52.84, -165.77, 8.36, -44.56, 61.76, -132.78, -246.12, -276.75], &quot;pl&quot;: 46, &quot;iw&quot;: 436, &quot;pt&quot;: 14, &quot;ih&quot;: 180, &quot;lo&quot;: -276.75, &quot;hi&quot;: 82.37}"
      role="img" aria-label="cumulative P&L line chart">
   <line x1="46" y1="194.0" x2="482" y2="194.0" stroke="#2c2c2a" stroke-width="1"/><text x="40" y="197.5" fill="#898781" font-size="10" text-anchor="end" style="font-variant-numeric:tabular-nums">-277</text><line x1="46" y1="134.0" x2="482" y2="134.0" stroke="#2c2c2a" stroke-width="1"/><text x="40" y="137.5" fill="#898781" font-size="10" text-anchor="end" style="font-variant-numeric:tabular-nums">-157</text><line x1="46" y1="74.0" x2="482" y2="74.0" stroke="#2c2c2a" stroke-width="1"/><text x="40" y="77.5" fill="#898781" font-size="10" text-anchor="end" style="font-variant-numeric:tabular-nums">-37</text><line x1="46" y1="14.0" x2="482" y2="14.0" stroke="#2c2c2a" stroke-width="1"/><text x="40" y="17.5" fill="#898781" font-size="10" text-anchor="end" style="font-variant-numeric:tabular-nums">+82</text><line x1="46" y1="55.3" x2="482" y2="55.3" stroke="#383835" stroke-width="1"/>
   <line x1="46" y1="14" x2="46" y2="194" stroke="#383835" stroke-width="1"/>
@@ -95,13 +106,8 @@
         stroke-width="1" stroke-dasharray="3,3" opacity="0"/>
   <circle class="hd" cx="-9" cy="-9" r="4" fill="#3987e5"
           stroke="#1a1a19" stroke-width="2" opacity="0"/>
-</svg>
-  </div>
-  <div class="card">
-    <h2>Paper lab — cumulative P&L ($, simulated)</h2>
-    <div class="legend"><span class="dot" style="background:#d95926"></span>
-      TradingView $10k practice account, reset 2026-08-10 — sim results, quarantined from live stats</div>
-    <svg viewBox="0 0 560 220" class="lc" id="lc-paper" data-pts="{&quot;days&quot;: [&quot;2026-08-10&quot;, &quot;2026-08-11&quot;], &quot;vals&quot;: [287.2, -49.4], &quot;pl&quot;: 46, &quot;iw&quot;: 436, &quot;pt&quot;: 14, &quot;ih&quot;: 180, &quot;lo&quot;: -49.4, &quot;hi&quot;: 287.2, &quot;color&quot;: &quot;#d95926&quot;}"
+</svg></details>
+  <details class="card" open><summary>Paper lab — cumulative P&L ($, simulated)</summary><div class="legend"><span class="dot" style="background:#d95926"></span>TradingView $10k practice account, reset 2026-08-10 — net of commission, quarantined from live stats</div><svg viewBox="0 0 560 220" class="lc" id="lc-paper" data-pts="{&quot;days&quot;: [&quot;2026-08-10&quot;, &quot;2026-08-11&quot;], &quot;vals&quot;: [287.2, -49.4], &quot;pl&quot;: 46, &quot;iw&quot;: 436, &quot;pt&quot;: 14, &quot;ih&quot;: 180, &quot;lo&quot;: -49.4, &quot;hi&quot;: 287.2}"
      role="img" aria-label="cumulative P&L line chart">
   <line x1="46" y1="194.0" x2="482" y2="194.0" stroke="#2c2c2a" stroke-width="1"/><text x="40" y="197.5" fill="#898781" font-size="10" text-anchor="end" style="font-variant-numeric:tabular-nums">-49</text><line x1="46" y1="134.0" x2="482" y2="134.0" stroke="#2c2c2a" stroke-width="1"/><text x="40" y="137.5" fill="#898781" font-size="10" text-anchor="end" style="font-variant-numeric:tabular-nums">+63</text><line x1="46" y1="74.0" x2="482" y2="74.0" stroke="#2c2c2a" stroke-width="1"/><text x="40" y="77.5" fill="#898781" font-size="10" text-anchor="end" style="font-variant-numeric:tabular-nums">+175</text><line x1="46" y1="14.0" x2="482" y2="14.0" stroke="#2c2c2a" stroke-width="1"/><text x="40" y="17.5" fill="#898781" font-size="10" text-anchor="end" style="font-variant-numeric:tabular-nums">+287</text><line x1="46" y1="167.6" x2="482" y2="167.6" stroke="#383835" stroke-width="1"/>
   <line x1="46" y1="14" x2="46" y2="194" stroke="#383835" stroke-width="1"/>
@@ -118,69 +124,36 @@
         stroke-width="1" stroke-dasharray="3,3" opacity="0"/>
   <circle class="hd" cx="-9" cy="-9" r="4" fill="#d95926"
           stroke="#1a1a19" stroke-width="2" opacity="0"/>
-</svg>
-  </div>
-
-  <div class="card">
-    <h2>Report-card grades (process, not P&L)</h2>
-    <div class="legend">one chip per session card, oldest → newest; hover for the tally.
-      Grades score rule-following — a clean loss can be an A.</div>
-    <div><span class="chip" style="background:#5598e7;color:#0b0b0b" title="2026-07-24 — C+ (3 clean / 2 flawed)">C+</span><span class="chip" style="background:#1c5cab;color:#ffffff" title="2026-07-27 — A- (9 clean / 1 flawed)">A-</span><span class="chip" style="background:#1c5cab;color:#ffffff" title="2026-07-28 — A- (2 clean / 1 flawed)">A-</span><span class="chip" style="background:#3987e5;color:#ffffff" title="2026-07-29 — B- (2 clean / 1 flawed)">B-</span><span class="chip" style="background:#2a78d6;color:#ffffff" title="2026-07-30 — B (8 clean / 1 flawed)">B</span><span class="chip" style="background:#86b6ef;color:#0b0b0b" title="2026-07-31 — C- (1 clean / 12 flawed)">C-</span><span class="chip" style="background:#86b6ef;color:#0b0b0b" title="2026-08-03 — C- (0 clean / 1 flawed)">C-</span><span class="chip" style="background:#2a78d6;color:#ffffff" title="2026-08-04 — B (1 clean / 1 flawed)">B</span><span class="chip" style="background:#1c5cab;color:#ffffff" title="2026-08-05 — A- (3 clean / 0 flawed)">A-</span><span class="chip" style="background:#3987e5;color:#ffffff" title="2026-08-06 — B- (8 clean / 1 flawed)">B-</span><span class="chip" style="background:#256abf;color:#ffffff" title="2026-08-07 — B+ (3 clean / 1 flawed)">B+</span><span class="chip" style="background:#1c5cab;color:#ffffff" title="2026-08-10 — A- (9 clean / 2 flawed)">A-</span><span class="chip" style="background:#6da7ec;color:#0b0b0b" title="2026-08-11 — C (3 clean / 7 flawed)">C</span></div>
-  </div>
-
-  <div class="card">
-    <h2>Paper → live gate (roadmap phase 0a)</h2>
-    <div class="gate-row">
+</svg></details>
+  <details class="card" open><summary>Report-card grades (process, not P&L)</summary><div class="legend">one chip per session, oldest → newest; hover for the tally. Grades score rule-following — a clean loss can be an A. Full daily write-ups on the <a href="journal.html" style="color:inherit">Journal</a> page.</div><div><span class="chip" style="background:#5598e7;color:#0b0b0b" title="2026-07-24 — C+ (3 clean / 2 flawed)">C+</span><span class="chip" style="background:#1c5cab;color:#ffffff" title="2026-07-27 — A- (9 clean / 1 flawed)">A-</span><span class="chip" style="background:#1c5cab;color:#ffffff" title="2026-07-28 — A- (2 clean / 1 flawed)">A-</span><span class="chip" style="background:#3987e5;color:#ffffff" title="2026-07-29 — B- (2 clean / 1 flawed)">B-</span><span class="chip" style="background:#2a78d6;color:#ffffff" title="2026-07-30 — B (8 clean / 1 flawed)">B</span><span class="chip" style="background:#86b6ef;color:#0b0b0b" title="2026-07-31 — C- (1 clean / 12 flawed)">C-</span><span class="chip" style="background:#86b6ef;color:#0b0b0b" title="2026-08-03 — C- (0 clean / 1 flawed)">C-</span><span class="chip" style="background:#2a78d6;color:#ffffff" title="2026-08-04 — B (1 clean / 1 flawed)">B</span><span class="chip" style="background:#1c5cab;color:#ffffff" title="2026-08-05 — A- (3 clean / 0 flawed)">A-</span><span class="chip" style="background:#3987e5;color:#ffffff" title="2026-08-06 — B- (8 clean / 1 flawed)">B-</span><span class="chip" style="background:#256abf;color:#ffffff" title="2026-08-07 — B+ (3 clean / 1 flawed)">B+</span><span class="chip" style="background:#1c5cab;color:#ffffff" title="2026-08-10 — A- (9 clean / 2 flawed)">A-</span><span class="chip" style="background:#6da7ec;color:#0b0b0b" title="2026-08-11 — C (3 clean / 7 flawed)">C</span></div></details>
+  <details class="card" open><summary>Paper → live gate (roadmap phase 0a)</summary><div class="gate-row">
   <div class="gate-label">Closed paper trades</div>
   <div class="gate-track"><div class="gate-fill" style="width:45.0%;background:#256abf"></div></div>
-  <div class="gate-val"><span class="gicon">·</span> 18 / 40</div>
-</div>
-    <div class="gate-row">
+  <div class="gate-val">· 18 / 40</div>
+</div><div class="gate-row">
   <div class="gate-label">Lab sessions</div>
   <div class="gate-track"><div class="gate-fill" style="width:20.0%;background:#256abf"></div></div>
-  <div class="gate-val"><span class="gicon">·</span> 2 / 10</div>
-</div>
-    <div class="gate-row">
+  <div class="gate-val">· 2 / 10</div>
+</div><div class="gate-row">
   <div class="gate-label">Rolling-40 net P&amp;L ≥ $0</div>
   <div class="gate-track"><div class="gate-fill" style="width:0.0%;background:#256abf"></div></div>
-  <div class="gate-val"><span class="gicon">·</span> -19.00</div>
-</div>
-    <div class="gate-row">
+  <div class="gate-val">· -49.40</div>
+</div><div class="gate-row">
   <div class="gate-label">… minus best trade ≥ $0</div>
   <div class="gate-track"><div class="gate-fill" style="width:0.0%;background:#256abf"></div></div>
-  <div class="gate-val"><span class="gicon">·</span> -131.00</div>
+  <div class="gate-val">· -159.80</div>
+</div><div class="muted" style="font-size:12px;margin-top:6px">Plus: 1–3 graduation-ready plays and a written declaration — human-checked.</div></details>
+  <details class="card span2" open><summary>Autonomous paper agent — 30-day
+  experiment</summary><div class="legend">Claude decision layer on SPY (Alpaca
+  paper) vs take-everything robot controls — <a href="agent.html"
+  style="color:inherit">full page</a>.</div><table><tr><th>day</th><th class='num'>agent trades</th><th class='num'>agent $</th><th class='num'>robot trades</th><th class='num'>robots ΣR</th></tr><tr><td>2026-08-10 <span class='muted'>(voided — schema bug)</span></td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>6</td><td class='num'>-10.65</td></tr><tr><td>2026-08-11</td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>4</td><td class='num'>-3.42</td></tr></table></details>
+  <details class="card" open><summary>Latest research verdicts</summary><ul class="research"><li>BT-076 lands: the gap-plus-fib entry from that trading video — the gap is doing the work, the fib line isn&#x27;t.</li><li>BT-075 lands: &quot;higher high, higher low, then retest that old high&quot; — your bread-and-butter, tested mechanically. The level is real; this exact version of the trade still loses money.</li><li>BT-074 lands: does crude oil (via USO) behave like ES/SPY intraday? Two of three findings say yes, one confirms a null.</li></ul><div class="muted" style="font-size:12px">Full shelf on the <a href="research.html" style="color:inherit">Research</a> page.</div></details>
+  <details class="card" open><summary>Recent trades</summary><table><tr><th>when (CT)</th><th>what</th><th></th><th class="num">P&L $</th><th class="num">R</th><th>exit</th></tr><tr><td style='white-space:nowrap'>08-11 13:13</td><td>MGC long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-6.60</td><td class='num'></td><td class='muted'>manual close, self-flagged as a paper-permission leak</td></tr><tr><td style='white-space:nowrap'>08-11 12:41</td><td>MNQ long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-49.60</td><td class='num'></td><td class='muted'>bracket stop-loss hit as declared</td></tr><tr><td style='white-space:nowrap'>08-11 12:27</td><td>MGC short</td><td><span class='tag paper'>PAPER</span></td><td class='num pos'>+5.40</td><td class='num'></td><td class='muted'>manual close moments later</td></tr><tr><td style='white-space:nowrap'>08-11 12:20</td><td>MGC long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-41.60</td><td class='num'></td><td class='muted'>closed via reverse-position button, NOT the bracket stop</td></tr><tr><td style='white-space:nowrap'>08-11 10:46</td><td>MCL long</td><td><span class='tag paper'>PAPER</span></td><td class='num pos'>+3.40</td><td class='num'></td><td class='muted'>stop manually raised to breakeven-plus on a fresh swing low,…</td></tr><tr><td style='white-space:nowrap'>08-11 11:40</td><td>MGC long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-26.60</td><td class='num'></td><td class='muted'>manual close, self-flagged as premature -- distracted by wor…</td></tr><tr><td style='white-space:nowrap'>08-11 10:43</td><td>MGC short</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-34.60</td><td class='num'></td><td class='muted'>closed via TradingView&#x27;s reverse-position button (not a stop…</td></tr><tr><td style='white-space:nowrap'>08-11 10:05</td><td>MCL long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-1.60</td><td class='num'></td><td class='muted'>manual close, discretionary (didn&#x27;t like the price action)</td></tr><tr><td style='white-space:nowrap'>08-11 09:26</td><td>MGC long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-117.20</td><td class='num'></td><td class='muted'>consolidated 2-lot stop-loss hit</td></tr><tr><td style='white-space:nowrap'>08-11 08:42</td><td>MGC long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-67.60</td><td class='num'></td><td class='muted'>manual close per self-mechanized invalidation (5m close red)</td></tr></table><div class="muted" style="font-size:12px;margin-top:6px">Complete history on the <a href="trades.html" style="color:inherit">Trades</a> page.</div></details>
 </div>
-    <div class="muted" style="font-size:12px;margin-top:6px">Plus: 1–3 graduation-ready
-    plays and a written declaration — checked at tape review, not auto-computed.</div>
-  </div>
-
-  <div class="card span2">
-    <h2>Autonomous paper agent — 30-day pre-registered experiment</h2>
-    <div class="legend">Claude decision layer on SPY (Alpaca paper) vs take-everything
-      robot controls. Skips are scored against what the robots ate. Clock started 2026-08-11.</div>
-    <table><tr><th>day</th><th class="num">agent trades</th><th class="num">agent $</th>
-      <th class="num">robot trades</th><th class="num">robots ΣR</th></tr><tr><td>2026-08-10 <span class='muted'>(voided — schema bug, see EXPERIMENT.md)</span></td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>6</td><td class='num'>-10.65</td></tr><tr><td>2026-08-11</td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>4</td><td class='num'>-3.42</td></tr></table>
-  </div>
-
-  <div class="card">
-    <h2>Latest research verdicts</h2>
-    <ul class="research"><li>BT-076 lands: the gap-plus-fib entry from that trading video — the gap is doing the work, the fib line isn&#x27;t.</li><li>BT-075 lands: &quot;higher high, higher low, then retest that old high&quot; — your bread-and-butter, tested mechanically. The level is real; this exact version of the trade still loses money.</li><li>BT-074 lands: does crude oil (via USO) behave like ES/SPY intraday? Two of three findings say yes, one confirms a null.</li></ul>
-    <div class="muted" style="font-size:12px">Every idea is backtested against fair
-    controls before it's believed — most die. Full receipts live in the repo.</div>
-  </div>
-
-  <div class="card">
-    <h2>Recent trades</h2>
-    <table><tr><th>when (CT)</th><th>what</th><th></th><th class="num">P&L $</th>
-      <th class="num">R</th><th>exit</th></tr><tr><td style='white-space:nowrap'>08-11 13:13</td><td>MGC long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-5.00</td><td class='num'></td><td class='muted'>manual close, self-flagged as a paper-permission leak</td></tr><tr><td style='white-space:nowrap'>08-11 12:41</td><td>MNQ long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-48.00</td><td class='num'></td><td class='muted'>bracket stop-loss hit as declared</td></tr><tr><td style='white-space:nowrap'>08-11 12:27</td><td>MGC short</td><td><span class='tag paper'>PAPER</span></td><td class='num pos'>+7.00</td><td class='num'></td><td class='muted'>manual close moments later</td></tr><tr><td style='white-space:nowrap'>08-11 12:20</td><td>MGC long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-40.00</td><td class='num'></td><td class='muted'>closed via reverse-position button, NOT the bracket stop</td></tr><tr><td style='white-space:nowrap'>08-11 10:46</td><td>MCL long</td><td><span class='tag paper'>PAPER</span></td><td class='num pos'>+5.00</td><td class='num'></td><td class='muted'>stop manually raised to breakeven-plus on a fresh swing low,…</td></tr><tr><td style='white-space:nowrap'>08-11 11:40</td><td>MGC long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-25.00</td><td class='num'></td><td class='muted'>manual close, self-flagged as premature -- distracted by wor…</td></tr><tr><td style='white-space:nowrap'>08-11 10:43</td><td>MGC short</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-33.00</td><td class='num'></td><td class='muted'>closed via TradingView&#x27;s reverse-position button (not a stop…</td></tr><tr><td style='white-space:nowrap'>08-11 10:05</td><td>MCL long</td><td><span class='tag paper'>PAPER</span></td><td class='num pos'>+0.00</td><td class='num'></td><td class='muted'>manual close, discretionary (didn&#x27;t like the price action)</td></tr><tr><td style='white-space:nowrap'>08-11 09:26</td><td>MGC long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-114.00</td><td class='num'></td><td class='muted'>consolidated 2-lot stop-loss hit</td></tr><tr><td style='white-space:nowrap'>08-11 08:42</td><td>MGC long</td><td><span class='tag paper'>PAPER</span></td><td class='num neg'>-66.00</td><td class='num'></td><td class='muted'>manual close per self-mechanized invalidation (5m close red)</td></tr><tr><td style='white-space:nowrap'>08-10 12:30</td><td>MCL long</td><td><span class='tag paper'>PAPER</span></td><td class='num pos'>+14.00</td><td class='num'></td><td class='muted'>manual close, early -- did not hold for the stated VWAP-band…</td></tr><tr><td style='white-space:nowrap'>08-10 14:07</td><td>MNQ long</td><td><span class='tag paper'>PAPER</span></td><td class='num pos'>+7.00</td><td class='num'></td><td class='muted'>manual market close -- reasoning NOT captured on tape (last …</td></tr></table>
-  </div>
-</div>
-
-<footer>Process over P&L. Auto-generated daily from the trading journal by
-<code>scripts/build_dashboard_site.py</code> — no hand-edited numbers. Sim results
-are labeled sim everywhere; nothing here is financial advice.</footer>
-</div>
-<div id="tip"></div>
+<footer>Process over P&L. Auto-generated daily from the trading journal —
+no hand-edited numbers. Sim results are labeled sim everywhere; nothing here
+is financial advice or a signal.</footer>
+</div><div id="tip"></div>
 <script>
 (function () {
   var tip = document.getElementById('tip');
@@ -211,5 +184,4 @@ are labeled sim everywhere; nothing here is financial advice.</footer>
     });
   });
 })();
-</script>
-</body></html>
+</script></body></html>

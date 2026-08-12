@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Lab · APM Trading Desk</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background:#0d0d0d; color:#ffffff;
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+         padding: 24px 20px 60px; }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header .sub { color: #c3c2b7; font-size: 13px; margin: 2px 0 12px; }
+  nav { display:flex; gap:6px; flex-wrap:wrap; border-bottom:1px solid #2c2c2a;
+        padding-bottom:12px; }
+  nav a { color:#c3c2b7; text-decoration:none; font-size:13px; font-weight:600;
+          padding:6px 12px; border-radius:7px; border:1px solid rgba(255,255,255,0.10); }
+  nav a:hover { color:#ffffff; background:#1a1a19; }
+  nav a.on { color:#ffffff; background:#1a1a19; border-color:#383835; }
+  .grid { display: grid; gap: 14px; margin-top: 16px;
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+  details.card, .card { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
+          border-radius:10px; padding:16px 18px; overflow:hidden; }
+  details.card > summary { cursor:pointer; list-style:none; font-size:13px;
+          font-weight:600; color:#c3c2b7; text-transform:uppercase;
+          letter-spacing:.4px; user-select:none; }
+  details.card > summary::before { content:"▸ "; color:#898781; }
+  details.card[open] > summary::before { content:"▾ "; }
+  details.card > summary::-webkit-details-marker { display:none; }
+  details.card[open] > summary { margin-bottom:10px; }
+  .card h2 { font-size:13px; font-weight:600; color:#c3c2b7;
+             text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px; }
+  .legend { font-size:12px; color:#898781; margin:-2px 0 8px; }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:50%;
+         margin-right:5px; }
+  .tiles { display:grid; gap:14px; margin-top:16px;
+           grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); }
+  .tile { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
+          border-radius:10px; padding:14px 16px; }
+  .tlabel { font-size:11px; color:#898781; text-transform:uppercase;
+            letter-spacing:.4px; }
+  .tval { font-size:26px; font-weight:700; margin-top:3px; }
+  .tval.pos { color:#0ca30c; } .tval.neg { color:#d03b3b; }
+  .tsub { font-size:12px; color:#c3c2b7; margin-top:2px; }
+  svg.lc { width:100%; height:auto; display:block; }
+  .chip { display:inline-block; min-width:30px; text-align:center;
+          padding:4px 6px; margin:0 4px 4px 0; border-radius:6px;
+          font-size:12px; font-weight:700; cursor:default; }
+  .gate-row { display:grid; grid-template-columns: 1fr 2fr auto; gap:10px;
+              align-items:center; margin-bottom:9px; font-size:13px; }
+  .gate-label { color:#c3c2b7; }
+  .gate-track { height:10px; background:#2c2c2a; border-radius:5px; }
+  .gate-fill { height:10px; border-radius:5px; min-width:2px; }
+  .gate-val { color:#c3c2b7; font-variant-numeric:tabular-nums;
+              white-space:nowrap; }
+  .gate-val.met { color:#0ca30c; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; color:#898781; font-weight:600; font-size:11px;
+       text-transform:uppercase; letter-spacing:.4px; padding:4px 8px 6px 0; }
+  td { padding:5px 8px 5px 0; border-top:1px solid #2c2c2a; vertical-align:top; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  td.num.pos { color:#0ca30c; } td.num.neg { color:#d03b3b; }
+  .tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:9px;
+         letter-spacing:.4px; }
+  .tag.live { background:#3987e5; color:#fff; }
+  .tag.paper { background:#d95926; color:#fff; }
+  .muted { color:#898781; }
+  ul.research { padding-left:18px; }
+  ul.research li { margin-bottom:10px; font-size:14px; color:#c3c2b7; }
+  article.entry { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
+          border-radius:10px; padding:18px 20px; margin-top:16px; }
+  article.entry h3 { font-size:15px; margin-bottom:2px; }
+  article.entry .meta { font-size:12px; color:#898781; margin-bottom:10px; }
+  article.entry p { margin:0 0 12px; color:#c3c2b7; font-size:14px; }
+  footer { margin-top:26px; color:#898781; font-size:12px; }
+  #tip { position:fixed; pointer-events:none; background:#1a1a19;
+         border:1px solid rgba(255,255,255,0.10); border-radius:7px; padding:6px 10px;
+         font-size:12px; color:#ffffff; opacity:0; z-index:9;
+         box-shadow:0 4px 14px rgba(0,0,0,.5); font-variant-numeric:tabular-nums; }
+  .span2 { grid-column: 1 / -1; }
+</style></head><body><div class="wrap">
+<header>
+  <h1>APM Trading Desk</h1>
+  <div class="sub">Futures day-trading journal — public process record.
+  Rebuilt 2026-08-12 10:55 UTC · trader day 43. Paper and live are tracked side by side
+  and <b>never pooled</b>; paper P&L is net of commission where reconciled.</div>
+  <nav><a href="index.html">Overview</a><a href="journal.html">Journal</a><a href="trades.html">Trades</a><a href="research.html">Research</a><a href="agent.html" class=on>Agent Lab</a></nav>
+</header>
+<div class="card" style="margin-top:16px">
+<h2>Autonomous paper agent — 30-day pre-registered experiment</h2>
+<div class="legend">A Claude decision layer receives mechanical scanner signals
+on SPY during regular hours and decides take/skip/manage with written reasoning
+for every decision, executing on an Alpaca PAPER account (no real money
+anywhere). "Robot" controls take every signal blindly — they exist so the
+agent's skips can be scored: a skipped signal's value is whatever the robot ate
+taking it. Pre-registered 30 trading days from 2026-08-11; graded at the end,
+not cherry-picked along the way. Day 1 of the clock (2026-08-10 in the table)
+was voided for the agent arm by a logged bug amendment — kept on the record,
+not scrubbed.</div>
+<table><tr><th>day</th><th class='num'>agent trades</th><th class='num'>agent $</th><th class='num'>robot trades</th><th class='num'>robots ΣR</th></tr><tr><td>2026-08-10 <span class='muted'>(voided — schema bug)</span></td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>6</td><td class='num'>-10.65</td></tr><tr><td>2026-08-11</td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>4</td><td class='num'>-3.42</td></tr></table>
+<div class="muted" style="font-size:12px;margin-top:8px">Robots ΣR = sum of
+R-multiples the take-everything controls earned that day. Negative is expected
+— that is the point of a control.</div></div>
+<footer>Process over P&L. Auto-generated daily from the trading journal —
+no hand-edited numbers. Sim results are labeled sim everywhere; nothing here
+is financial advice or a signal.</footer>
+</div></body></html>
