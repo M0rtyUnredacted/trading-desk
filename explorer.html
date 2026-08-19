@@ -1,0 +1,347 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backtest Explorer</title>
+<style>
+  :root { color-scheme: dark;
+    --bg:#0d0d0d; --card:#1a1a19; --line:rgba(255,255,255,0.10);
+    --ink:#ffffff; --ink2:#c3c2b7; --muted:#8a8a7f;
+    --real:#3987e5; --hot:#d95926; --ctl:#8f7ae8; --grid:#2c2c2a; }
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--ink); margin:0;
+    font:14px/1.5 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width:980px; margin:0 auto; padding:18px 16px 60px; }
+  nav { display:flex; gap:6px; flex-wrap:wrap; border-bottom:1px solid var(--grid);
+    padding-bottom:10px; margin-bottom:18px; }
+  nav a { color:var(--ink2); text-decoration:none; font-size:13px; font-weight:600;
+    padding:6px 10px; border-radius:8px; border:1px solid transparent; }
+  nav a:hover { color:var(--ink); background:var(--card); }
+  nav a.on { color:var(--ink); background:var(--card); border-color:#383835; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  h2 { font-size:16px; margin:26px 0 8px; }
+  .sub { color:var(--muted); font-size:12.5px; margin-bottom:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:14px 16px; margin:10px 0; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:6px 0 10px; }
+  .seg { display:inline-flex; border:1px solid #383835; border-radius:8px; overflow:hidden; }
+  .seg button { background:transparent; color:var(--ink2); border:0; padding:6px 12px;
+    font:600 12.5px inherit; cursor:pointer; }
+  .seg button.on { background:#2c2c2a; color:var(--ink); }
+  .chip { display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px;
+    font-weight:700; border:1px solid var(--line); }
+  .chip.pass { background:#173a1e; color:#7fd48a; border-color:#2c5c36; }
+  .chip.fail { background:#3a1a17; color:#e89287; border-color:#5c2c28; }
+  .chip.null { background:#2c2c2a; color:var(--ink2); }
+  .tiles { display:flex; gap:10px; flex-wrap:wrap; margin:8px 0; }
+  .tile { background:#141413; border:1px solid var(--line); border-radius:10px;
+    padding:8px 14px; min-width:120px; }
+  .tile .v { font-size:20px; font-weight:800; }
+  .tile .k { font-size:11.5px; color:var(--muted); }
+  .legend { display:flex; gap:14px; font-size:12px; color:var(--ink2); margin:2px 0 6px; }
+  .legend .sw { display:inline-block; width:10px; height:10px; border-radius:3px;
+    margin-right:5px; vertical-align:-1px; }
+  svg text { font:11px inherit; fill:var(--ink2); }
+  svg .axis { stroke:var(--grid); stroke-width:1; }
+  svg .zero { stroke:#4a4a46; stroke-width:1.5; }
+  svg .dl { fill:var(--ink2); font-weight:600; }
+  #tip { position:fixed; pointer-events:none; background:var(--card); color:var(--ink);
+    border:1px solid #383835; border-radius:8px; padding:6px 10px; font-size:12px;
+    display:none; z-index:9; max-width:260px; }
+  .note { color:var(--muted); font-size:12px; margin-top:6px; }
+  details.tbl { margin-top:8px; } details.tbl summary { color:var(--muted); font-size:12px; cursor:pointer; }
+  table { border-collapse:collapse; font-size:12px; margin-top:6px; }
+  td,th { border:1px solid var(--grid); padding:3px 8px; text-align:right; }
+  th:first-child, td:first-child { text-align:left; }
+  .verdict { border-left:3px solid var(--hot); padding:8px 12px; background:#141413;
+    border-radius:0 8px 8px 0; font-size:13px; color:var(--ink2); margin-top:10px; }
+</style></head><body><div class="wrap">
+<nav><a href="index.html">Overview</a><a href="journal.html">Journal</a><a href="trades.html">Trades</a><a href="research.html">Research</a><a href="agent.html">Agent Lab</a><a href="explorer.html" class="on">Explorer</a></nav>
+
+<h1>Backtest Explorer</h1>
+<div class="sub">An interactive viewer over the desk's <b>canonical</b> results — every number
+below came from the pre-registered runs on 16 years of ES 1-minute data with real fills and
+0.75-pt costs. The knobs navigate the tested lattice; nothing here can generate an
+unvalidated number, which is the point. Exploration eras (2010–21) decide; vault eras
+(2022–26, hatched) are shown and never decide. Aggregated statistics only — no price data
+is published.</div>
+
+<div id="app">Loading canonical results…</div>
+<div id="tip"></div>
+
+<script>
+const C = { real:'#3987e5', hot:'#d95926', ctl:'#8f7ae8', muted:'#8a8a7f' };
+const tip = document.getElementById('tip');
+function showTip(e, html){ tip.innerHTML = html; tip.style.display='block';
+  tip.style.left = Math.min(e.clientX+14, innerWidth-280)+'px'; tip.style.top = (e.clientY+14)+'px'; }
+function hideTip(){ tip.style.display='none'; }
+const fmt = v => (v>0?'+':'')+(+v).toFixed(3);
+const SVGT = new Set(['svg','path','line','rect','circle','text','defs','pattern','g']);
+const el = (t,a={},h='') => {
+  const n = SVGT.has(t) ? document.createElementNS('http://www.w3.org/2000/svg', t)
+                        : document.createElement(t);
+  for(const k in a) n.setAttribute(k,a[k]); if(h!=='') n.innerHTML=h; return n; };
+
+// ── SVG bar chart: groups of 1-2 series, zero-baseline, rounded data ends ──
+function barChart(spec){
+  // spec: {groups:[{label, vault?, vals:[{v, series, tipHtml}]}], series:[{name,color}],
+  //        w, h, refLine?, dl? (direct-label indices), unit}
+  const w = spec.w||900, h = spec.h||220, padL=46, padR=8, padT=10, padB=34;
+  const vals = spec.groups.flatMap(g=>g.vals.map(x=>x.v));
+  let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
+  if (spec.refLine!=null){ lo=Math.min(lo,spec.refLine); hi=Math.max(hi,spec.refLine); }
+  const span = (hi-lo)||1; lo -= span*0.12; hi += span*0.12;
+  const y = v => padT + (hi-v)/(hi-lo)*(h-padT-padB);
+  const ns = spec.series.length;
+  const gw = (w-padL-padR)/spec.groups.length;
+  const bw = Math.min(34, (gw-8)/ns - 2);
+  const svg = el('svg',{viewBox:`0 0 ${w} ${h}`, width:'100%'});
+  // y grid at ~4 ticks
+  const step = niceStep((hi-lo)/4);
+  for(let t=Math.ceil(lo/step)*step; t<=hi; t+=step){
+    svg.appendChild(el('line',{x1:padL,x2:w-padR,y1:y(t),y2:y(t),class:'axis'}));
+    svg.appendChild(el('text',{x:padL-6,y:y(t)+4,'text-anchor':'end'}, (+t.toFixed(3)).toString()));
+  }
+  svg.appendChild(el('line',{x1:padL,x2:w-padR,y1:y(0),y2:y(0),class:'zero'}));
+  if (spec.refLine!=null){
+    svg.appendChild(el('line',{x1:padL,x2:w-padR,y1:y(spec.refLine),y2:y(spec.refLine),
+      stroke:C.hot,'stroke-dasharray':'4 4','stroke-width':1.5}));
+    svg.appendChild(el('text',{x:w-padR,y:y(spec.refLine)-5,'text-anchor':'end',fill:C.hot},
+      spec.refLabel||''));
+  }
+  spec.groups.forEach((g,gi)=>{
+    const gx = padL + gi*gw + gw/2;
+    g.vals.forEach((cell,si)=>{
+      const x = gx - (ns*bw + (ns-1)*2)/2 + si*(bw+2);
+      const y0=y(0), y1=y(cell.v);
+      const top=Math.min(y0,y1), bh=Math.max(2,Math.abs(y0-y1)), r=Math.min(4,bh);
+      const up = cell.v>=0;
+      const d = up
+        ? `M${x},${y0} L${x},${top+r} Q${x},${top} ${x+r},${top} L${x+bw-r},${top} Q${x+bw},${top} ${x+bw},${top+r} L${x+bw},${y0} Z`
+        : `M${x},${y0} L${x},${top+bh-r} Q${x},${top+bh} ${x+r},${top+bh} L${x+bw-r},${top+bh} Q${x+bw},${top+bh} ${x+bw},${top+bh-r} L${x+bw},${y0} Z`;
+      const p = el('path',{d, fill:spec.series[si].color,
+        opacity:g.vault?0.45:1});
+      p.addEventListener('mousemove',e=>showTip(e,cell.tipHtml));
+      p.addEventListener('mouseleave',hideTip);
+      svg.appendChild(p);
+      if (g.vault){
+        const hp = el('path',{d, fill:'url(#hatch)', 'pointer-events':'none'});
+        svg.appendChild(hp);
+      }
+      if (spec.dl){
+        svg.appendChild(el('text',{x:x+bw/2, y:up? y1-4 : y1+12,
+          'text-anchor':'middle', class:'dl'}, fmt(cell.v)));
+      }
+    });
+    svg.appendChild(el('text',{x:gx,y:h-14,'text-anchor':'middle'},
+      g.label + (g.vault?' (v)':'')));
+  });
+  const defs = el('defs',{}, `<pattern id="hatch" width="6" height="6"
+     patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+     <line x1="0" y1="0" x2="0" y2="6" stroke="#0d0d0d" stroke-width="2"/></pattern>`);
+  svg.prepend(defs);
+  return svg;
+}
+function niceStep(x){ const p=Math.pow(10,Math.floor(Math.log10(x||1)));
+  for (const m of [1,2,2.5,5,10]) if (m*p>=x) return m*p; return 10*p; }
+
+function legend(series){
+  const d = el('div',{class:'legend'});
+  series.forEach(s=> d.appendChild(el('span',{},
+    `<span class="sw" style="background:${s.color}"></span>${s.name}`)));
+  d.appendChild(el('span',{},`<span class="sw" style="background:${C.muted};opacity:.45"></span>hatched = vault era (never decides)`));
+  return d;
+}
+function tableView(headers, rows){
+  const d = el('details',{class:'tbl'}); d.appendChild(el('summary',{},'table view'));
+  const t = el('table',{}); t.appendChild(el('tr',{},headers.map(h=>`<th>${h}</th>`).join('')));
+  rows.forEach(r=>t.appendChild(el('tr',{},r.map(c=>`<td>${c}</td>`).join(''))));
+  d.appendChild(t); return d;
+}
+function seg(options, cur, onpick){
+  const d = el('div',{class:'seg'});
+  options.forEach(o=>{ const b=el('button',{class:o.id===cur?'on':''},o.label);
+    b.onclick=()=>onpick(o.id); d.appendChild(b); });
+  return d;
+}
+function chipFor(verdict, robust){
+  const cls = /^PASS|REAL/.test(verdict)?'pass':(/UNDER/.test(verdict)?'null':'fail');
+  return `<span class="chip ${cls}">${verdict}${robust?' · eras '+robust:''}</span>`;
+}
+
+// ═════════════════════ render ═════════════════════
+let D=null, st={variant:'V1H', tf:'1h', cond:'C1'};
+fetch('explorer_data.json').then(r=>r.json()).then(d=>{ D=d; render(); });
+
+function render(){
+  const app = document.getElementById('app'); app.innerHTML='';
+  app.appendChild(mod085());
+  app.appendChild(mod089());
+  app.appendChild(el('div',{class:'note'},
+    `Data built ${D.built_utc} from backtest/results/ (canonical files). ` +
+    `Sources: es_range_retest_bounce.md (BT-085), es_break_candle_bracket.md (BT-089).`));
+}
+
+function mod085(){
+  const box = el('section');
+  box.appendChild(el('h2',{},'Module 1 · Displaced-retest bounce (BT-085)'));
+  box.appendChild(el('div',{class:'sub'},
+    'Break of a range edge → wait for a 1-ATR displacement → limit at the broken edge. ' +
+    'The level is real (beats a depth-matched blind control) — and the take-everything version loses. Both facts below.'));
+  const card = el('div',{class:'card'});
+  const row = el('div',{class:'row'});
+  row.appendChild(seg([{id:'V15',label:'15m / 5m'},{id:'V1H',label:'1H / 15m'},
+    {id:'V4H',label:'4H / 1H'}], st.variant, id=>{st.variant=id; render();}));
+  const v = D.bt085[st.variant];
+  row.appendChild(el('span',{},chipFor(v.primary.verdict, v.primary.robust)));
+  card.appendChild(row);
+  card.appendChild(el('div',{class:'tiles'},''));
+  const tiles = card.lastChild;
+  [['net R/fill (all-comers)',fmt(v.primary.real_r)],
+   ['blind control',fmt(v.primary.ctl_r)],
+   ['lift vs control',fmt(v.primary.lift)+' R'],
+   ['MDE','±'+v.primary.mde],
+   ['fills (exploration)',v.primary.real_n.toLocaleString()]]
+   .forEach(([k,val])=>tiles.appendChild(el('div',{class:'tile'},
+     `<div class="v">${val}</div><div class="k">${k}</div>`)));
+  card.appendChild(legend([{name:'retest entries (real)',color:C.real},
+                           {name:'blind control (same depth, no level)',color:C.ctl}]));
+  card.appendChild(barChart({
+    groups: v.real_eras.map((r,i)=>({label:r.era, vault:r.vault, vals:[
+      {v:r.cells[3], tipHtml:`<b>${r.era}</b> real<br>net ${fmt(r.cells[3])} R/fill · n=${r.cells[4].toLocaleString()}`},
+      {v:v.ctl_eras[i].cells[3], tipHtml:`<b>${r.era}</b> control<br>net ${fmt(v.ctl_eras[i].cells[3])} R/fill · n=${v.ctl_eras[i].cells[4].toLocaleString()}`}]})),
+    series:[{color:C.real},{color:C.ctl}], h:230}));
+  card.appendChild(tableView(['era','real net R','real n','control net R','control n'],
+    v.real_eras.map((r,i)=>[r.era+(r.vault?' (v)':''), fmt(r.cells[3]), r.cells[4].toLocaleString(),
+      fmt(v.ctl_eras[i].cells[3]), v.ctl_eras[i].cells[4].toLocaleString()])));
+  box.appendChild(card);
+
+  // knob sweeps — one dimension each off the primary cell
+  const sw = el('div',{class:'card'});
+  sw.appendChild(el('div',{class:'sub'},
+    '<b>Knob sweeps</b> — each varies ONE dimension off the primary cell ' +
+    '(D=1.0 · structural target · limit fill · execution-TF close invalidation). ' +
+    'Pooled exploration; differences smaller than the MDE above are noise.'));
+  const grids = el('div');
+  grids.appendChild(miniBars('Displacement D (× ATR)',
+    v.d_sweep.map(x=>({label:'D='+x.d, v:x.net_r,
+      tip:`D=${x.d}<br>net ${fmt(x.net_r)} R/fill · n=${x.n.toLocaleString()}`}))));
+  grids.appendChild(miniBars('Target family',
+    v.targets.map(x=>({label:x.target.split(' — ')[0], v:x.net_r,
+      tip:`${x.target}<br>net ${fmt(x.net_r)} R/fill`}))));
+  grids.appendChild(miniBars('Fill honesty (limit vs market-at-touch)',
+    v.fill_honesty.flatMap(x=>[
+      {label:x.target.split(' ')[0]+' lim', v:x.limit_r, tip:`${x.target} · resting limit<br>net ${fmt(x.limit_r)}`},
+      {label:x.target.split(' ')[0]+' mkt', v:x.market_r, tip:`${x.target} · market at touch<br>net ${fmt(x.market_r)}`}])));
+  if (v.dwell) grids.appendChild(miniBars('Dwell after fill (closes back inside range) — the rot table',
+    v.dwell.map(x=>({label:x.bucket, v:x.net_r,
+      tip:`dwell ${x.bucket} bars<br>net ${fmt(x.net_r)} R/fill · n=${x.n.toLocaleString()}`}))));
+  grids.appendChild(miniBars('BOS vs CHoCH',
+    v.bos_choch.map(x=>({label:x.type, v:x.net_r,
+      tip:`${x.type}<br>net ${fmt(x.net_r)} R/fill · n=${x.n.toLocaleString()}`}))));
+  sw.appendChild(grids);
+  box.appendChild(sw);
+  return box;
+}
+
+function miniBars(title, items){
+  const d = el('div');
+  d.appendChild(el('div',{style:'font-size:13px;font-weight:700;margin:12px 0 2px'},title));
+  d.appendChild(barChart({groups:items.map(x=>({label:x.label, vals:[
+    {v:x.v, tipHtml:x.tip}]})), series:[{color:C.real}], h:150, dl:true}));
+  return d;
+}
+
+function mod089(){
+  const box = el('section');
+  box.appendChild(el('h2',{},'Module 2 · Break-candle bracket + conditions (BT-089)'));
+  box.appendChild(el('div',{class:'sub'},
+    'Your hindsight-chart recipe: immediate limit at the broken level, stop past the break candle\'s wick, 2:1. ' +
+    'Conditions vs impostor controls — where the volume story lived and died.'));
+  const card = el('div',{class:'card'});
+  const row = el('div',{class:'row'});
+  row.appendChild(seg([{id:'1h',label:'1H'},{id:'15m',label:'15m'}], st.tf,
+    id=>{st.tf=id; render();}));
+  row.appendChild(seg([{id:'C0',label:'C0 · none'},{id:'C1',label:'C1 · volume>1.5×'},
+    {id:'C2',label:'C2 · EMA aligned'},{id:'C3',label:'C3 · both'}], st.cond,
+    id=>{st.cond=id; render();}));
+  const cell = D.bt089.tf[st.tf][st.cond];
+  if (cell.verdict) row.appendChild(el('span',{},
+    chipFor(cell.verdict, cell.robust) + ` <span class="chip null">lift vs C0: ${fmt(cell.lift)} R (MDE ±${cell.mde})</span>`));
+  card.appendChild(row);
+  card.appendChild(legend([{name:`${st.tf.toUpperCase()} · ${st.cond}`,color:C.real}]));
+  card.appendChild(barChart({groups: cell.eras.map(r=>({label:r.era, vault:r.vault, vals:[
+    {v:r.net_r, tipHtml:`<b>${r.era}</b><br>net ${fmt(r.net_r)} R/fill · n=${r.n.toLocaleString()}`}]})),
+    series:[{color:C.real}], h:210, dl:true}));
+  box.appendChild(card);
+
+  const duel = el('div',{class:'card'});
+  duel.appendChild(el('div',{class:'sub'},
+    `<b>The impostor duel</b> — C1 (volume) vs a size-only flag (big candle, no volume). ` +
+    chipFor('C1 vs size: '+D.bt089.impostor.verdict, D.bt089.impostor.robust)));
+  duel.appendChild(legend([{name:'C1 · heavy volume',color:C.real},
+                           {name:'size impostor · big candle',color:C.ctl}]));
+  duel.appendChild(barChart({groups:D.bt089.impostor.eras.map(r=>({label:r.era, vault:r.vault, vals:[
+    {v:r.c1_r, tipHtml:`<b>${r.era}</b> C1 volume<br>net ${fmt(r.c1_r)}`},
+    {v:r.size_r, tipHtml:`<b>${r.era}</b> size impostor<br>net ${fmt(r.size_r)}`}]})),
+    series:[{color:C.real},{color:C.ctl}], h:200}));
+  duel.appendChild(miniBars('Stop-width buckets — where C1\'s lift actually comes from (C0 vs C1 per bucket)',
+    D.bt089.stop_width.flatMap(x=>[
+      {label:x.bucket+' C0', v:x.c0_r, tip:`${x.bucket} unconditioned<br>net ${fmt(x.c0_r)}`},
+      {label:x.bucket+' C1', v:x.c1_r, tip:`${x.bucket} volume-gated<br>net ${fmt(x.c1_r)} · lift ${fmt(x.lift)}`}])));
+  box.appendChild(duel);
+
+  const ks = el('div',{class:'card'});
+  ks.appendChild(el('div',{class:'sub'},
+    '<b>The target-width sweep + continuation ladder</b> — "make the winners bigger" measured. ' +
+    'Moving 2R→3R breaks even only above 75% continuation; measured: ' +
+    D.bt089.continuation.map(c=>`${c.step} = ${c.p}%`).join(' · ') + '.'));
+  ks.appendChild(miniBars('Net R/trade by bracket width K (1H·C1 fills)',
+    D.bt089.k_sweep.map(x=>({label:'K='+x.k, v:x.net_r,
+      tip:`target ${x.k}<br>net ${fmt(x.net_r)} R/trade · reach rate ${x.reach_pct}%`}))));
+  ks.appendChild(miniBars('Exit designs vs the plain 2:1 bracket (dashed = bracket −0.090)',
+    D.bt089.trails.map(x=>({label:'Trail '+x.id, v:x.net_r,
+      tip:`<b>Trail ${x.id}</b> — ${x.desc}<br>net ${fmt(x.net_r)} R/trade · activation ${x.activation_pct}% · giveback ${x.giveback}`}))));
+  // add reference line to the last chart by rebuilding with refLine
+  ks.lastChild.replaceChild(barChart({groups:D.bt089.trails.map(x=>({label:'Trail '+x.id, vals:[
+    {v:x.net_r, tipHtml:`<b>Trail ${x.id}</b> — ${x.desc}<br>net ${fmt(x.net_r)} R/trade · activation ${x.activation_pct}% · giveback ${x.giveback}`}]})),
+    series:[{color:C.real}], h:150, dl:true, refLine:-0.090, refLabel:'2:1 bracket −0.090'}),
+    ks.lastChild.lastChild);
+  box.appendChild(ks);
+
+  const at = el('div',{class:'card'});
+  at.appendChild(el('div',{class:'sub'},
+    '<b>Winner-conditions atlas</b> — do ANY classic conditions separate winners from losers? ' +
+    'Standardized mean difference; |SMD| ≥ 0.2 would be a candidate. Nothing qualifies.'));
+  at.appendChild(smdPlot(D.bt089.atlas_num));
+  at.appendChild(tableView(['flag','win-rate when true','when false'],
+    D.bt089.atlas_cat.map(r=>[r.feature, (r.wr_true*100).toFixed(0)+'%', (r.wr_false*100).toFixed(0)+'%'])));
+  at.appendChild(el('div',{class:'verdict'}, D.bt089.verdict));
+  box.appendChild(at);
+  return box;
+}
+
+function smdPlot(rows){
+  const w=900, rowH=26, padL=150, padR=30, h=rows.length*rowH+30;
+  const x = v => padL + (v+0.5)/1.0*(w-padL-padR);
+  const svg = el('svg',{viewBox:`0 0 ${w} ${h}`, width:'100%'});
+  // threshold band ±0.2
+  svg.appendChild(el('rect',{x:x(-0.2), y:6, width:x(0.2)-x(-0.2), height:h-30,
+    fill:'#2c2c2a', opacity:0.5}));
+  [[-0.5,'-0.5'],[-0.2,'-0.2'],[0,'0'],[0.2,'+0.2'],[0.5,'+0.5']].forEach(([v,l])=>{
+    svg.appendChild(el('line',{x1:x(v),x2:x(v),y1:6,y2:h-24,class:v===0?'zero':'axis'}));
+    svg.appendChild(el('text',{x:x(v),y:h-8,'text-anchor':'middle'},l));
+  });
+  rows.forEach((r,i)=>{
+    const cy = 18+i*rowH;
+    svg.appendChild(el('text',{x:padL-8,y:cy+4,'text-anchor':'end'},r.feature));
+    const dot = el('circle',{cx:x(r.smd), cy, r:6, fill:C.hot,
+      stroke:'#1a1a19','stroke-width':2});
+    dot.addEventListener('mousemove',e=>showTip(e,
+      `<b>${r.feature}</b><br>SMD ${r.smd}<br>winners mean ${r.winners} · losers ${r.losers}`));
+    dot.addEventListener('mouseleave',hideTip);
+    svg.appendChild(dot);
+  });
+  svg.appendChild(el('text',{x:w-padR,y:16,'text-anchor':'end'},'gray band = |SMD| < 0.2: not a candidate. Nothing escapes it.'));
+  return svg;
+}
+</script>
+</div></body></html>
