@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agent Lab · APM Trading Desk</title>
+<title>Indicators · APM Trading Desk</title>
 <meta name="robots" content="noindex">
 <style>
   :root { color-scheme: dark; }
@@ -87,26 +87,9 @@
   and <b>never pooled</b>. P&amp;L is the broker-true settled figure only where the
   ledger carries one — otherwise it is gross, before commission. Each figure
   below says which it is.</div>
-  <nav><a href="index.html">Overview</a><a href="journal.html">Journal</a><a href="trades.html">Trades</a><a href="research.html">Research</a><a href="agent.html" class=on>Agent Lab</a><a href="explorer.html">Explorer</a><a href="labs.html">Backtest Lab</a><a href="indicators.html">Indicators</a></nav>
+  <nav><a href="index.html">Overview</a><a href="journal.html">Journal</a><a href="trades.html">Trades</a><a href="research.html">Research</a><a href="agent.html">Agent Lab</a><a href="explorer.html">Explorer</a><a href="labs.html">Backtest Lab</a><a href="indicators.html" class=on>Indicators</a></nav>
 </header>
-<div class="card" style="margin-top:16px">
-<h2>Autonomous paper agent — 30-day pre-registered experiment</h2>
-<div class="legend">A Claude decision layer receives mechanical scanner signals
-on SPY during regular hours and decides take/skip/manage with written reasoning
-for every decision, executing on an Alpaca PAPER account (no real money
-anywhere). "Robot" controls take every signal blindly — they exist so the
-agent's skips can be scored: a skipped signal's value is whatever the robot ate
-taking it. Pre-registered 30 trading days; the clock was restarted by a logged
-amendment when a factual error in the agent's evidence brief was corrected
-(playbook v1.4) — <b>Day 1 of the scored window is 2026-08-14</b>.
-Earlier days in the table (2026-08-10 through 2026-08-13) are retained as
-pre-amendment phase data, never pooled into the 30; 2026-08-10 was separately
-voided for the agent arm by a logged bug amendment — kept on the record, not
-scrubbed. Full amendment log lives in the repo (EXPERIMENT.md).</div>
-<table><tr><th>day</th><th class='num'>agent trades</th><th class='num'>agent $</th><th class='num'>agent $ total</th><th class='num'>robot trades</th><th class='num'>robots ΣR</th><th class='num'>robots ΣR total</th></tr><tr><td>2026-08-10 <span class='muted'>(voided — schema bug)</span></td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>+0.00</td><td class='num'>6</td><td class='num'>-10.65</td><td class='num'>-10.65</td></tr><tr><td>2026-08-11</td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>+0.00</td><td class='num'>4</td><td class='num'>-3.42</td><td class='num'>-14.07</td></tr><tr><td>2026-08-12</td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>+0.00</td><td class='num'>8</td><td class='num'>-0.43</td><td class='num'>-14.50</td></tr><tr><td>2026-08-13</td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>+0.00</td><td class='num'>2</td><td class='num'>+1.01</td><td class='num'>-13.49</td></tr><tr><td>2026-08-14</td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>+0.00</td><td class='num'>5</td><td class='num'>+0.14</td><td class='num'>-13.35</td></tr><tr><td>2026-08-17</td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>+0.00</td><td class='num'>7</td><td class='num'>-7.33</td><td class='num'>-20.68</td></tr><tr><td>2026-08-18</td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>+0.00</td><td class='num'>8</td><td class='num'>-0.30</td><td class='num'>-20.98</td></tr><tr><td>2026-08-19</td><td class='num'>1</td><td class='num'>-20.71</td><td class='num'>-20.71</td><td class='num'>8</td><td class='num'>-2.48</td><td class='num'>-23.46</td></tr><tr><td>2026-08-21</td><td class='num'>0</td><td class='num'>+0.00</td><td class='num'>-20.71</td><td class='num'>5</td><td class='num'>+2.95</td><td class='num'>-20.51</td></tr><tr style='font-weight:600'><td>running total (all 9 days)</td><td class='num'>1</td><td class='num'></td><td class='num'>-20.71</td><td class='num'>53</td><td class='num'></td><td class='num'>-20.51</td></tr></table>
-<div class="muted" style="font-size:12px;margin-top:8px">Robots ΣR = sum of
-R-multiples the take-everything controls earned that day. Negative is expected
-— that is the point of a control.</div></div>
+<h1>Indicators</h1><div class="muted" style="margin-bottom:14px">Hand-picked TradingView indicators from the desk — Pine Script v6, free to copy and use. These are visibility tools that help read price action, not signal systems; nothing here is a promise of edge. To use one: copy the source, open TradingView’s Pine Editor, paste, save, add to chart.</div><div class="card">Nothing published yet — the favorites get added one at a time.</div>
 <footer>Process over P&L. Auto-generated daily from the trading journal —
 no hand-edited numbers. Sim results are labeled sim everywhere; nothing here
 is financial advice or a signal.</footer>
