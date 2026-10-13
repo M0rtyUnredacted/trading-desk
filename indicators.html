@@ -1,96 +1,185 @@
-<!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Indicators · APM Trading Desk</title>
-<meta name="robots" content="noindex">
-<style>
-  :root { color-scheme: dark; }
-  * { box-sizing: border-box; margin: 0; }
-  body { background:#0d0d0d; color:#ffffff;
-         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
-         padding: 24px 20px 60px; }
-  .wrap { max-width: 1180px; margin: 0 auto; }
-  header h1 { font-size: 22px; font-weight: 700; }
-  header .sub { color: #c3c2b7; font-size: 13px; margin: 2px 0 12px; }
-  nav { display:flex; gap:6px; flex-wrap:wrap; border-bottom:1px solid #2c2c2a;
-        padding-bottom:12px; }
-  nav a { color:#c3c2b7; text-decoration:none; font-size:13px; font-weight:600;
-          padding:6px 12px; border-radius:7px; border:1px solid rgba(255,255,255,0.10); }
-  nav a:hover { color:#ffffff; background:#1a1a19; }
-  nav a.on { color:#ffffff; background:#1a1a19; border-color:#383835; }
-  .grid { display: grid; gap: 14px; margin-top: 16px;
-          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
-  details.card, .card { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
-          border-radius:10px; padding:16px 18px; overflow:hidden; }
-  details.card > summary { cursor:pointer; list-style:none; font-size:13px;
-          font-weight:600; color:#c3c2b7; text-transform:uppercase;
-          letter-spacing:.4px; user-select:none; }
-  details.card > summary::before { content:"▸ "; color:#898781; }
-  details.card[open] > summary::before { content:"▾ "; }
-  details.card > summary::-webkit-details-marker { display:none; }
-  details.card[open] > summary { margin-bottom:10px; }
-  .card h2 { font-size:13px; font-weight:600; color:#c3c2b7;
-             text-transform:uppercase; letter-spacing:.4px; margin-bottom:10px; }
-  .legend { font-size:12px; color:#898781; margin:-2px 0 8px; }
-  .dot { display:inline-block; width:8px; height:8px; border-radius:50%;
-         margin-right:5px; }
-  .tiles { display:grid; gap:14px; margin-top:16px;
-           grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); }
-  .tile { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
-          border-radius:10px; padding:14px 16px; }
-  .tlabel { font-size:11px; color:#898781; text-transform:uppercase;
-            letter-spacing:.4px; }
-  .tval { font-size:26px; font-weight:700; margin-top:3px; }
-  .tval.pos { color:#0ca30c; } .tval.neg { color:#d03b3b; }
-  .tsub { font-size:12px; color:#c3c2b7; margin-top:2px; }
-  svg.lc { width:100%; height:auto; display:block; }
-  .chip { display:inline-block; min-width:30px; text-align:center;
-          padding:4px 6px; margin:0 4px 4px 0; border-radius:6px;
-          font-size:12px; font-weight:700; cursor:default; }
-  .gate-row { display:grid; grid-template-columns: 1fr 2fr auto; gap:10px;
-              align-items:center; margin-bottom:9px; font-size:13px; }
-  .gate-label { color:#c3c2b7; }
-  .gate-track { height:10px; background:#2c2c2a; border-radius:5px; }
-  .gate-fill { height:10px; border-radius:5px; min-width:2px; }
-  .gate-val { color:#c3c2b7; font-variant-numeric:tabular-nums;
-              white-space:nowrap; }
-  .gate-val.met { color:#0ca30c; }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  th { text-align:left; color:#898781; font-weight:600; font-size:11px;
-       text-transform:uppercase; letter-spacing:.4px; padding:4px 8px 6px 0; }
-  td { padding:5px 8px 5px 0; border-top:1px solid #2c2c2a; vertical-align:top; }
-  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
-  td.num.pos { color:#0ca30c; } td.num.neg { color:#d03b3b; }
-  .tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:9px;
-         letter-spacing:.4px; }
-  .tag.live { background:#3987e5; color:#fff; }
-  .tag.paper { background:#d95926; color:#fff; }
-  .muted { color:#898781; }
-  ul.research { padding-left:18px; }
-  ul.research li { margin-bottom:10px; font-size:14px; color:#c3c2b7; }
-  article.entry { background:#1a1a19; border:1px solid rgba(255,255,255,0.10);
-          border-radius:10px; padding:18px 20px; margin-top:16px; }
-  article.entry h3 { font-size:15px; margin-bottom:2px; }
-  article.entry .meta { font-size:12px; color:#898781; margin-bottom:10px; }
-  article.entry p { margin:0 0 12px; color:#c3c2b7; font-size:14px; }
-  footer { margin-top:26px; color:#898781; font-size:12px; }
-  #tip { position:fixed; pointer-events:none; background:#1a1a19;
-         border:1px solid rgba(255,255,255,0.10); border-radius:7px; padding:6px 10px;
-         font-size:12px; color:#ffffff; opacity:0; z-index:9;
-         box-shadow:0 4px 14px rgba(0,0,0,.5); font-variant-numeric:tabular-nums; }
-  .span2 { grid-column: 1 / -1; }
-</style></head><body><div class="wrap">
-<header>
-  <h1>APM Trading Desk</h1>
-  <div class="sub">Futures day-trading journal — public process record.
-  Rebuilt 2026-10-12 23:14 UTC · trader day 104. Paper and live are tracked side by side
-  and <b>never pooled</b>. P&amp;L is the broker-true settled figure only where the
-  ledger carries one — otherwise it is gross, before commission. Each figure
-  below says which it is.</div>
-  <nav><a href="index.html">Overview</a><a href="journal.html">Journal</a><a href="trades.html">Trades</a><a href="research.html">Research</a><a href="agent.html">Agent Lab</a><a href="explorer.html">Explorer</a><a href="labs.html">Backtest Lab</a><a href="indicators.html" class=on>Indicators</a><a href="sentiment.html">Sentiment</a></nav>
-</header>
-<h1>Indicators</h1><div class="muted" style="margin-bottom:14px">Hand-picked TradingView indicators from the desk — Pine Script v6, free to copy and use. These are visibility tools that help read price action, not signal systems; nothing here is a promise of edge. To use one: copy the source, open TradingView’s Pine Editor, paste, save, add to chart.</div><div class="card">Nothing published yet — the favorites get added one at a time.</div>
-<footer>Process over P&L. Auto-generated daily from the trading journal —
-no hand-edited numbers. Sim results are labeled sim everywhere; nothing here
-is financial advice or a signal.</footer>
-</div></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex"><meta name="description" content="The Desk. A public futures trading process journal, with paper and live results kept separate.">
+<title>Indicators | The Desk</title><style>:root{color-scheme:light;--bg:#f5f5ef;--panel:#fffefa;--ink:#20392e;--soft:#667366;--green:#286e4c;--dark:#16372b;--red:#a04438;--amber:#89662b;--line:#dce1d7}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--green);text-underline-offset:4px}button,input,select{font:inherit;color:inherit}button,select,input{min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:9px 12px}button{cursor:pointer;font-weight:600}button:hover{border-color:var(--green)}button:disabled{opacity:.5;cursor:default}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--green);outline-offset:4px}h1,h2,h3,p{margin:0}h1{font-size:clamp(30px,4vw,48px);letter-spacing:-1.5px;line-height:1.15}h2{font-size:22px;letter-spacing:-.4px;line-height:1.3}h3{font-size:18px;line-height:1.35}p+p{margin-top:14px}.wrap{max-width:1300px;margin:auto;padding:30px 32px 54px}.skip{position:absolute;top:-80px;left:16px;background:var(--dark);color:white;padding:10px;z-index:10}.skip:focus{top:10px}header{display:flex;justify-content:space-between;align-items:center;gap:18px;border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:32px}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);font-weight:750;font-size:22px;letter-spacing:-.6px}.mark{background:var(--dark);color:#fffefa;display:grid;place-items:center;width:36px;height:36px;border-radius:11px;font:22px Georgia,serif}nav{display:flex;flex-wrap:wrap;gap:4px}nav a{padding:9px 15px;border-radius:9px;color:var(--soft);font-weight:600;text-decoration:none}nav a[aria-current=page]{background:var(--dark);color:#fffefa}nav a:hover{box-shadow:inset 0 0 0 1px var(--line)}.eyebrow{font-size:12px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--soft);margin-bottom:10px}.intro{margin-bottom:26px}.intro p{max-width:690px;color:var(--soft);margin-top:12px}.freshness{font-size:13px;color:var(--soft);margin:18px 0}.strip{display:grid;grid-template-columns:repeat(4,1fr);background:var(--dark);color:#fffefa;border-radius:18px;overflow:hidden;margin:24px 0;gap:1px}.stat{padding:22px 24px}.stat+.stat{border-left:1px solid #ffffff20}.stat .label{font-size:13px;color:#d1dfd3}.stat strong{display:block;font-size:28px;letter-spacing:-.7px;font-variant-numeric:tabular-nums;margin:4px 0}.stat small{font-size:13px;color:#d1dfd3;display:block}.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;margin:20px 0}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;min-width:0}.practice{border-top:4px solid var(--green)}.practice h2{font:28px/1.3 Georgia,"Times New Roman",serif;letter-spacing:-.3px;margin:12px 0 18px}.card p{margin-top:12px}.muted{color:var(--soft)}.small{font-size:13px}.badge{display:inline-block;border-radius:7px;padding:4px 9px;background:#e8efe6;color:var(--dark);font-size:12px;font-weight:650;margin-right:5px}.badge.live{background:#e8edf5;color:#345378}.badge.review{background:#f5eddc;color:var(--amber)}.grade{font-size:54px;line-height:1.15;letter-spacing:-2px;margin:12px 0}.section-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}.controls{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.controls label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600}.controls input,.controls select{max-width:100%}.chart-card{margin:20px 0}.chart{display:block;width:100%;height:auto;max-height:330px;margin-top:22px;overflow:visible}.chart text{fill:var(--soft);font:12px system-ui}.chart-readout{padding:12px 15px;background:var(--bg);border-radius:10px;min-height:48px;font-variant-numeric:tabular-nums}.explore{display:flex;align-items:center;gap:16px;margin-top:15px}.explore label{font-size:13px;white-space:nowrap}.explore input{flex:1;min-width:0;accent-color:var(--green);padding:0}.quality{display:grid;grid-template-columns:1fr 1fr;gap:20px}.metric{font-size:26px;letter-spacing:-.6px;font-weight:700;font-variant-numeric:tabular-nums}.mini{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}.mini dt{font-size:13px;color:var(--soft)}.mini dd{font-size:21px;font-weight:650;margin:4px 0 0;font-variant-numeric:tabular-nums}.note{font-size:13px;color:var(--soft);margin-top:16px}.notice{padding:12px 15px;border:1px solid #ded1af;background:#f7f0df;border-radius:10px;color:var(--amber);margin-top:16px}details>summary{cursor:pointer;font-weight:600;padding:10px 0;min-height:44px}details p{margin:12px 0}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}caption{text-align:left;padding:12px 0;color:var(--soft)}th{text-align:left;color:var(--soft);font-size:12px;letter-spacing:.3px;padding:12px 10px;border-bottom:1px solid var(--line)}td{padding:14px 10px;border-bottom:1px solid var(--line);vertical-align:top}th:first-child,td:first-child{padding-left:0}.num{text-align:right}.pos{color:var(--green)}.neg{color:var(--red)}.trade-detail{background:var(--bg);border-radius:9px;padding:0 14px;font-size:13px}.trade-detail dl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.trade-detail dt{color:var(--soft)}.trade-detail dd{margin:0}.mobile-trades{display:none}.trade-card{border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:12px}.trade-card .section-head{margin-bottom:8px}.pager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px}.empty{padding:40px 20px;text-align:center;border:1px dashed var(--line);border-radius:12px;margin-top:18px}.empty h2{margin-bottom:10px}.journal-list{display:grid;gap:16px}.journal-entry summary{display:flex;gap:14px;justify-content:space-between;align-items:center}.journal-entry[open] summary{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px}.post p{white-space:pre-line;margin:0 0 18px}.journal-link{border-top:1px solid var(--line);margin-top:22px;padding-top:14px;font-size:14px}.filters{padding:18px 0}.filters input[type=search]{width:240px}.filters input[type=date]{width:158px}.results-label{font-size:14px;color:var(--soft);margin:16px 0}.indicator-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.indicator img{width:100%;border-radius:10px;margin-top:16px}.indicator pre{overflow:auto;max-height:440px;font:12px/1.5 ui-monospace,monospace;background:var(--bg);padding:16px;border-radius:10px}.indicator li{margin:8px 0}footer{border-top:1px solid var(--line);padding-top:22px;margin-top:36px;color:var(--soft);font-size:13px;display:flex;justify-content:space-between;gap:20px}footer p{max-width:700px}[hidden]{display:none!important}@media(max-width:850px){.wrap{padding:24px}.stat{padding:18px}.stat strong{font-size:24px}.grid{grid-template-columns:1fr 1fr}.quality{grid-template-columns:1fr}.card{padding:22px}header{align-items:flex-start;flex-direction:column}}@media(max-width:650px){.wrap{padding:20px 16px 36px}header{margin-bottom:24px}nav{width:100%;gap:3px}nav a{padding:10px;font-size:14px}.strip{grid-template-columns:1fr 1fr}.stat+.stat{border:0}.stat:nth-child(even){border-left:1px solid #ffffff20}.stat:nth-child(n+3){border-top:1px solid #ffffff20}.grid,.indicator-grid{grid-template-columns:1fr}.card{padding:20px}.practice h2{font-size:26px}.desktop-trades{display:none}.mobile-trades{display:block}.controls{gap:10px}.controls label{flex:1;min-width:130px}.controls select,.controls input{width:100%}.filters input[type=search]{width:100%}.chart{margin-top:18px}.explore{flex-direction:column;gap:4px;align-items:stretch}.explore input{width:100%}.pager{flex-wrap:wrap}.journal-entry summary{align-items:start;flex-direction:column;gap:8px}footer{flex-direction:column}}@media(max-width:380px){.strip{grid-template-columns:1fr}.stat:nth-child(even){border-left:0}.stat+.stat{border-top:1px solid #ffffff20}.mini{grid-template-columns:1fr}nav a{padding:8px;font-size:13px}.controls label{min-width:100%}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style></head>
+<body><a class="skip" href="#main">Skip to content</a><div class="wrap"><header><a class="brand" href="index.html"><span class="mark" aria-hidden="true">d.</span>The Desk</a>
+<nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="journal.html">Journal</a><a href="trades.html">Trades</a><a href="indicators.html" aria-current="page">Indicators</a></nav></header><main id="main"><div class="intro"><div class="eyebrow">Tools for reading the chart</div><h1>See the structure more clearly.</h1>
+<p>A hand-picked catalog of the desk's TradingView indicators. Each published tool includes its source and instructions. Chart tools do not establish a trading edge.</p></div>
+<div class="freshness">0 curated indicators · Catalog built 2026-10-13 00:35 UTC</div>
+<section class="card empty"><div class="eyebrow">The catalog is quiet</div><h2>No indicators published yet.</h2><p>Tools appear here when the desk selects them for public release.</p></section>
+<section class="card" style="margin-top:24px"><h2>Using a published indicator</h2><ol><li>Open its source and copy it.</li><li>In TradingView, open the Pine Editor, paste, and save.</li><li>Add it to your chart and read its settings and instructions.</li></ol>
+<p class="muted">If copying is unavailable, select the source text manually. Examples are labeled as screenshots or illustrations.</p></section></main>
+<footer><p>Process before profit. Paper is simulated; live is historical. This is a personal record, not a trade recommendation. Dollar results use settled net values where available; gross rows are labeled.</p>
+<a href="journal.html">Read the journal</a></footer></div><script id="desk-data" type="application/json">{}</script><script>/* The Desk: public numeric record only. No remote requests or private sources. */
+(() => {
+  'use strict';
+  const escape = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const money = (v, signed = false) => v == null ? 'Unavailable' : `${v < 0 ? '-' : signed ? '+' : ''}$${(Math.abs(v)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+  const result = r => r.closed ? money(r.pnl, true) : 'Result unavailable';
+  const basis = r => r.settled ? 'Net after fees' : r.closed ? 'Gross before fees' : 'Closed result unavailable';
+  const rText = r => r.r == null ? 'Unavailable' : `${r.r >= 0 ? '+' : ''}${r.r.toFixed(3)} R`;
+  function series(trades, mode, view, range) {
+    const days = new Map();
+    trades.filter(t => t.mode === mode && t.closed && t.pnl != null).forEach(t => {
+      const d = days.get(t.date) || {date:t.date,net:0,n:0,settled:0};
+      d.net += t.pnl; d.n++; d.settled += Number(t.settled); days.set(t.date,d);
+    });
+    let cumulative = mode === 'paper' ? 1000000 : 0;
+    const all = [...days.values()].sort((a,b)=>a.date.localeCompare(b.date)).map(d=>{
+      cumulative += d.net;
+      return {...d, cumulative, value:view === 'daily' ? d.net : cumulative};
+    });
+    return range === 'all' ? all : all.slice(-Number(range));
+  }
+  function filterTrades(trades, f) {
+    if (f.from && f.to && f.from > f.to) return [];
+    const query = (f.search || '').trim().toLowerCase();
+    const found = trades.filter(t =>
+      (!f.mode || f.mode === 'all' || t.mode === f.mode) &&
+      (!f.instrument || f.instrument === 'all' || t.instrument === f.instrument) &&
+      (!f.side || f.side === 'all' || t.side === f.side) &&
+      (!f.from || t.date >= f.from) && (!f.to || t.date <= f.to) &&
+      (!query || [t.date,t.time,t.instrument,t.side,t.mode,t.exit].join(' ').toLowerCase().includes(query)) &&
+      (!f.result || f.result === 'all' ||
+       (f.result === 'positive' && t.pnl != null && t.pnl > 0) ||
+       (f.result === 'negative' && t.pnl != null && t.pnl < 0) ||
+       (f.result === 'missing' && !t.closed) || (f.result === 'no-r' && t.r == null)));
+    const chronological = (a,b) => (a.date+' '+a.time).localeCompare(b.date+' '+b.time);
+    found.sort((a,b)=> {
+      if (f.sort === 'high' || f.sort === 'low') {
+        if (a.pnl == null || b.pnl == null) return a.pnl == null ? (b.pnl == null ? 0 : 1) : -1;
+        return (f.sort === 'high' ? b.pnl-a.pnl : a.pnl-b.pnl) || -chronological(a,b);
+      }
+      return f.sort === 'oldest' ? chronological(a,b) : -chronological(a,b);
+    });
+    return found;
+  }
+  function detail(r) {
+    return `<details class="trade-detail"><summary>Details</summary><dl><div><dt>Recorded initial risk</dt><dd>${money(r.risk)}</dd></div><div><dt>Result / risk</dt><dd>${rText(r)}</dd></div><div><dt>Exit type</dt><dd>${escape(r.exit || 'Not recorded')}</dd></div><div><dt>Result basis</dt><dd>${basis(r)}</dd></div></dl><p>Missing risk or R means unavailable, never zero. Private notes and account identifiers stay private.</p></details>`;
+  }
+  function row(r) {
+    return `<tr><td>${escape(r.date)}<div class="small muted">${escape(r.time || 'Time unavailable')} CT</div></td><td>${escape(r.instrument)}<div class="small muted">${escape(r.side)}</div></td><td><span class="badge ${r.mode}">${r.mode === 'paper' ? 'Paper' : 'Live'}</span>${r.experiment ? '<div class="small">Experiment</div>' : ''}</td><td class="num ${r.pnl < 0 ? 'neg' : r.pnl > 0 ? 'pos' : ''}">${result(r)}<div class="small muted">${basis(r)}</div></td><td class="num">${r.r == null ? '—' : r.r.toFixed(2)+' R'}</td><td>${detail(r)}</td></tr>`;
+  }
+  function card(r) {
+    return `<article class="trade-card"><div class="section-head"><h3>${escape(r.instrument)} · ${escape(r.side)}</h3><span class="badge ${r.mode}">${r.mode === 'paper' ? 'Paper' : 'Live'}</span></div><p class="small muted">${escape(r.date)} · ${escape(r.time || 'Time unavailable')} CT${r.experiment ? ' · Declared experiment' : ''}</p><p class="metric ${r.pnl < 0 ? 'neg' : r.pnl > 0 ? 'pos' : ''}">${result(r)}</p><p class="small muted">${basis(r)}</p>${detail(r)}</article>`;
+  }
+  // Same functions power the UI and the dependency-free logic tests.
+  if (typeof module !== 'undefined' && module.exports) module.exports = {series,filterTrades,money,detail,row,card};
+  if (typeof document === 'undefined') return;
+  const $ = id => document.getElementById(id);
+  const payload = $('desk-data');
+  if (!payload) return;
+  const trades = JSON.parse(payload.textContent).trades || [];
+  if ($('performance-chart')) {
+    const mode = $('chart-mode'), view = $('chart-view'), range = $('chart-range'), slider = $('chart-point');
+    const svg = $('performance-chart');
+    let points = [], X, Y;
+    function explore() {
+      if (!points.length) return;
+      const index = Math.max(0,Math.min(points.length-1,Number(slider.value)));
+      slider.value = String(index);
+      const p = points[index];
+      slider.setAttribute('aria-valuetext',`${p.date}: ${money(p.value)}`);
+      const label = view.value === 'daily' ? 'Daily result' : mode.value === 'paper' ? 'Paper balance' : 'Cumulative live result';
+      $('chart-readout').textContent = `${p.date} · ${label} ${money(p.value)} · Daily ${money(p.net,true)} · ${p.n} trade${p.n === 1 ? '' : 's'} · ${p.settled === p.n ? 'Net after fees' : p.settled === 0 ? 'Gross before fees' : 'Mixed net/gross'}`;
+      const cursor = $('chart-cursor');
+      if (cursor) { cursor.setAttribute('cx',X(index)); cursor.setAttribute('cy',Y(p.value)); }
+    }
+    function draw() {
+      points = series(trades,mode.value,view.value,range.value);
+      const title = view.value === 'daily' ? `${mode.value === 'paper' ? 'Paper' : 'Historical live'} daily result` : mode.value === 'paper' ? 'Paper balance' : 'Historical live cumulative result';
+      $('chart-title').textContent = title;
+      slider.max = String(Math.max(0,points.length-1)); slider.value = slider.max; slider.disabled = !points.length;
+      if (!points.length) {
+        svg.innerHTML = '';
+        $('chart-context').textContent = 'No completed trades in this account.';
+        $('chart-readout').textContent = 'Chart values are unavailable.';
+        $('chart-values').innerHTML = '<p>No chart values available.</p>';
+        slider.setAttribute('aria-valuetext','No chart values available');
+        return;
+      }
+      const n = points.reduce((sum,p)=>sum+p.n,0), settled = points.reduce((sum,p)=>sum+p.settled,0);
+      $('chart-context').textContent = `${points[0].date} to ${points.at(-1).date} · ${points.length} fill sessions · ${n} closed trades · ${settled === n ? 'Net after fees' : settled === 0 ? 'Gross before fees' : 'Mixed net/gross basis'}. Use the slider or tap the chart to explore.`;
+      let low = Math.min(...points.map(p=>p.value)), high = Math.max(...points.map(p=>p.value));
+      if (view.value === 'daily' || mode.value === 'live') { low = Math.min(low,0); high = Math.max(high,0); }
+      const span = high-low || 100;
+      low -= span*.12; high += span*.12;
+      X = i => 100 + (points.length === 1 ? .5 : i/(points.length-1))*836;
+      Y = value => 18 + (1-(value-low)/(high-low))*226;
+      let drawing = '';
+      for(let i=0;i<4;i++) {
+        const v = low+(high-low)*i/3, y = Y(v);
+        drawing += `<line x1="100" x2="936" y1="${y}" y2="${y}" stroke="#dce1d7"/><text x="88" y="${y+4}" text-anchor="end">${money(Math.round(v))}</text>`;
+      }
+      if (low<=0 && high>=0) drawing += `<line x1="100" x2="936" y1="${Y(0)}" y2="${Y(0)}" stroke="#667366" stroke-dasharray="4 4"/>`;
+      if (view.value === 'daily') {
+        const width = Math.min(36,700/points.length);
+        drawing += points.map((p,i)=>`<rect x="${X(i)-width/2}" y="${Math.min(Y(p.value),Y(0))}" width="${width}" height="${Math.max(1,Math.abs(Y(p.value)-Y(0)))}" rx="3" fill="${p.value < 0 ? '#a04438' : '#286e4c'}"/>`).join('');
+      } else {
+        drawing += `<path d="${points.map((p,i)=>`${i ? 'L':'M'} ${X(i)} ${Y(p.value)}`).join(' ')}" fill="none" stroke="#286e4c" stroke-width="3" stroke-linejoin="round"/>`;
+      }
+      drawing += `<circle id="chart-cursor" cx="0" cy="0" r="6" fill="#16372b" stroke="#fffefa" stroke-width="2"/><text x="100" y="275">${points[0].date}</text><text x="936" y="275" text-anchor="end">${points.at(-1).date}</text>`;
+      svg.innerHTML = drawing;
+      $('chart-values').innerHTML = `<table><caption>Chart values for the selected account and range</caption><thead><tr><th>Session</th><th class="num">Daily result</th><th class="num">${mode.value === 'paper' ? 'Paper balance' : 'Cumulative result'}</th><th class="num">Trades</th></tr></thead><tbody>${points.map(p=>`<tr><td>${p.date}</td><td class="num">${money(p.net,true)}</td><td class="num">${money(p.cumulative)}</td><td class="num">${p.n}</td></tr>`).join('')}</tbody></table>`;
+      explore();
+    }
+    [mode,view,range].forEach(el=>el.addEventListener('change',draw));
+    slider.addEventListener('input',explore);
+    svg.addEventListener('click',event=>{
+      if (!points.length) return;
+      const box = svg.getBoundingClientRect();
+      const x = (event.clientX-box.left)/box.width*960;
+      slider.value = String(Math.max(0,Math.min(points.length-1,Math.round((x-100)/836*(points.length-1)))));
+      explore();
+    });
+    draw();
+  }
+  if ($('trade-rows')) {
+    const fields = ['search','mode','instrument','side','result','from','to','sort'];
+    let page = 0;
+    const size = 20;
+    function render() {
+      const f = Object.fromEntries(fields.map(k=>[k,$('trade-'+k).value]));
+      const found = filterTrades(trades,f), pages = Math.max(1,Math.ceil(found.length/size));
+      page = Math.min(page,pages-1);
+      const visible = found.slice(page*size,(page+1)*size);
+      $('trade-count').textContent = `${found.length} of ${trades.length} public trades match. Account results are kept separate.`;
+      $('trade-rows').innerHTML = visible.map(row).join('');
+      $('trade-cards').innerHTML = visible.map(card).join('');
+      $('trade-empty').hidden = found.length>0;
+      $('trade-empty-title').textContent = f.from && f.to && f.from>f.to ? 'Check the date range' : 'No matching trades';
+      $('trade-empty-text').textContent = f.from && f.to && f.from>f.to ? 'The start date must be on or before the end date.' : 'Try another date or instrument, or reset the filters.';
+      $('trade-pager').hidden = !found.length;
+      $('trade-page').textContent = `Page ${page+1} of ${pages} · ${page*size+1}–${Math.min((page+1)*size,found.length)}`;
+      $('trade-prev').disabled = page === 0; $('trade-next').disabled = page >= pages-1;
+    }
+    fields.forEach(k=>$('trade-'+k).addEventListener(k === 'search' ? 'input' : 'change',()=>{page=0;render();}));
+    $('trade-prev').addEventListener('click',()=>{page--;render();});
+    $('trade-next').addEventListener('click',()=>{page++;render();});
+    $('trade-reset').addEventListener('click',()=>{
+      fields.forEach(k=>$('trade-'+k).value = k === 'sort' ? 'newest' : ['search','from','to'].includes(k) ? '' : 'all');
+      page=0;render();
+    });
+    render();
+  }
+  function openEntry(id) {
+    const entry = $(id);
+    if (entry && entry.classList.contains('journal-entry')) { entry.open = true; entry.scrollIntoView({block:'start'}); }
+  }
+  if ($('journal-jump')) {
+    $('journal-jump').addEventListener('change',event=>{
+      if (!event.target.value) return;
+      location.hash = event.target.value; openEntry(event.target.value);
+    });
+    window.addEventListener('hashchange',()=>openEntry(decodeURIComponent(location.hash.slice(1))));
+    openEntry(decodeURIComponent(location.hash.slice(1)));
+  }
+  document.querySelectorAll('.copy-source').forEach(button=>button.addEventListener('click',async()=>{
+    const status = button.nextElementSibling;
+    try {
+      await navigator.clipboard.writeText($(button.dataset.source).textContent);
+      status.textContent = ' Source copied.';
+    } catch (_) { status.textContent = ' Copy unavailable. Select the source text below.'; }
+  }));
+})();
+</script></body></html>
