@@ -5,7 +5,7 @@
 <body><a class="skip" href="#main">Skip to content</a><div class="wrap"><header><a class="brand" href="index.html"><span class="mark" aria-hidden="true">d.</span>The Desk</a>
 <nav aria-label="Main navigation"><a href="index.html" aria-current="page">Overview</a><a href="journal.html">Journal</a><a href="trades.html">Trades</a><a href="indicators.html">Indicators</a></nav></header><main id="main"><div class="intro"><div class="eyebrow">A trading process, in public</div><h1>Better decisions.<br>One session at a time.</h1>
 <p>The session, the practice, and the results behind them. Start with what happened, then look at the numbers.</p></div>
-<div class="freshness">Ledger through 2026-10-12 · Published journal through 2026-10-12 · Built 2026-10-13 00:35 UTC. Static snapshot; no live market feed.</div>
+<div class="freshness">Ledger through 2026-10-12 · Published journal through 2026-10-12 · Built 2026-10-13 00:37 UTC. Static snapshot; no live market feed.</div>
 <div class="strip"><div class="stat"><div class="label">Paper balance</div><strong>$9,402.35</strong><small>$10,000 reset · August 10, 2026</small></div><div class="stat"><div class="label">Paper result</div><strong>-$597.65</strong><small>Net after fees</small></div><div class="stat"><div class="label">Sample</div><strong>190 trades</strong><small>42 fill sessions</small></div><div class="stat"><div class="label">Latest session</div><strong>-$0.45</strong><small>2026-10-12</small></div></div><div class="grid"><section class="card practice"><div class="eyebrow">Current 1% focus · from the latest public post</div>
 <h2>before a manual exit based on a candle close, wait for it to finish and check that it really closed beyond my marked line.</h2><p class="muted">One repeatable action to work on. A day without a chance to practice does not prove a hit or a miss.</p>
 <p><a href="journal.html#2026-10-12">Read the session and its next step</a></p></section>
@@ -95,7 +95,7 @@
   if ($('performance-chart')) {
     const mode = $('chart-mode'), view = $('chart-view'), range = $('chart-range'), slider = $('chart-point');
     const svg = $('performance-chart');
-    let points = [], X, Y;
+    let points = [], X, Y, chartWidth = 960, chartLeft = 100, chartPlot = 836;
     function explore() {
       if (!points.length) return;
       const index = Math.max(0,Math.min(points.length-1,Number(slider.value)));
@@ -122,25 +122,30 @@
       }
       const n = points.reduce((sum,p)=>sum+p.n,0), settled = points.reduce((sum,p)=>sum+p.settled,0);
       $('chart-context').textContent = `${points[0].date} to ${points.at(-1).date} · ${points.length} fill sessions · ${n} closed trades · ${settled === n ? 'Net after fees' : settled === 0 ? 'Gross before fees' : 'Mixed net/gross basis'}. Use the slider or tap the chart to explore.`;
+      chartWidth = Math.max(320,Math.min(960,svg.clientWidth || 960));
+      chartLeft = chartWidth < 650 ? 76 : 100;
+      const chartRight = chartWidth-24;
+      chartPlot = chartRight-chartLeft;
+      svg.setAttribute('viewBox',`0 0 ${chartWidth} 290`);
       let low = Math.min(...points.map(p=>p.value)), high = Math.max(...points.map(p=>p.value));
       if (view.value === 'daily' || mode.value === 'live') { low = Math.min(low,0); high = Math.max(high,0); }
       const span = high-low || 100;
       low -= span*.12; high += span*.12;
-      X = i => 100 + (points.length === 1 ? .5 : i/(points.length-1))*836;
+      X = i => chartLeft + (points.length === 1 ? .5 : i/(points.length-1))*chartPlot;
       Y = value => 18 + (1-(value-low)/(high-low))*226;
       let drawing = '';
       for(let i=0;i<4;i++) {
         const v = low+(high-low)*i/3, y = Y(v);
-        drawing += `<line x1="100" x2="936" y1="${y}" y2="${y}" stroke="#dce1d7"/><text x="88" y="${y+4}" text-anchor="end">${money(Math.round(v))}</text>`;
+        drawing += `<line x1="${chartLeft}" x2="${chartRight}" y1="${y}" y2="${y}" stroke="#dce1d7"/><text x="${chartLeft-12}" y="${y+4}" text-anchor="end">${money(Math.round(v))}</text>`;
       }
-      if (low<=0 && high>=0) drawing += `<line x1="100" x2="936" y1="${Y(0)}" y2="${Y(0)}" stroke="#667366" stroke-dasharray="4 4"/>`;
+      if (low<=0 && high>=0) drawing += `<line x1="${chartLeft}" x2="${chartRight}" y1="${Y(0)}" y2="${Y(0)}" stroke="#667366" stroke-dasharray="4 4"/>`;
       if (view.value === 'daily') {
-        const width = Math.min(36,700/points.length);
+        const width = Math.min(36,chartPlot*.8/points.length);
         drawing += points.map((p,i)=>`<rect x="${X(i)-width/2}" y="${Math.min(Y(p.value),Y(0))}" width="${width}" height="${Math.max(1,Math.abs(Y(p.value)-Y(0)))}" rx="3" fill="${p.value < 0 ? '#a04438' : '#286e4c'}"/>`).join('');
       } else {
         drawing += `<path d="${points.map((p,i)=>`${i ? 'L':'M'} ${X(i)} ${Y(p.value)}`).join(' ')}" fill="none" stroke="#286e4c" stroke-width="3" stroke-linejoin="round"/>`;
       }
-      drawing += `<circle id="chart-cursor" cx="0" cy="0" r="6" fill="#16372b" stroke="#fffefa" stroke-width="2"/><text x="100" y="275">${points[0].date}</text><text x="936" y="275" text-anchor="end">${points.at(-1).date}</text>`;
+      drawing += `<circle id="chart-cursor" cx="0" cy="0" r="6" fill="#16372b" stroke="#fffefa" stroke-width="2"/><text x="${chartLeft}" y="275">${points[0].date}</text><text x="${chartRight}" y="275" text-anchor="end">${points.at(-1).date}</text>`;
       svg.innerHTML = drawing;
       $('chart-values').innerHTML = `<table><caption>Chart values for the selected account and range</caption><thead><tr><th>Session</th><th class="num">Daily result</th><th class="num">${mode.value === 'paper' ? 'Paper balance' : 'Cumulative result'}</th><th class="num">Trades</th></tr></thead><tbody>${points.map(p=>`<tr><td>${p.date}</td><td class="num">${money(p.net,true)}</td><td class="num">${money(p.cumulative)}</td><td class="num">${p.n}</td></tr>`).join('')}</tbody></table>`;
       explore();
@@ -150,9 +155,15 @@
     svg.addEventListener('click',event=>{
       if (!points.length) return;
       const box = svg.getBoundingClientRect();
-      const x = (event.clientX-box.left)/box.width*960;
-      slider.value = String(Math.max(0,Math.min(points.length-1,Math.round((x-100)/836*(points.length-1)))));
+      const x = (event.clientX-box.left)/box.width*chartWidth;
+      slider.value = String(Math.max(0,Math.min(points.length-1,Math.round((x-chartLeft)/chartPlot*(points.length-1)))));
       explore();
+    });
+    window.addEventListener('resize',()=>{
+      const selected = points[Number(slider.value)]?.date;
+      draw();
+      const index = points.findIndex(p=>p.date === selected);
+      if (index >= 0) { slider.value=String(index); explore(); }
     });
     draw();
   }

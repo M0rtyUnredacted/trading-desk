@@ -5,7 +5,7 @@
 <body><a class="skip" href="#main">Skip to content</a><div class="wrap"><header><a class="brand" href="index.html"><span class="mark" aria-hidden="true">d.</span>The Desk</a>
 <nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="journal.html">Journal</a><a href="trades.html">Trades</a><a href="indicators.html" aria-current="page">Indicators</a></nav></header><main id="main"><div class="intro"><div class="eyebrow">Tools for reading the chart</div><h1>See the structure more clearly.</h1>
 <p>A hand-picked catalog of the desk's TradingView indicators. Each published tool includes its source and instructions. Chart tools do not establish a trading edge.</p></div>
-<div class="freshness">0 curated indicators · Catalog built 2026-10-13 00:35 UTC</div>
+<div class="freshness">0 curated indicators · Catalog built 2026-10-13 00:37 UTC</div>
 <section class="card empty"><div class="eyebrow">The catalog is quiet</div><h2>No indicators published yet.</h2><p>Tools appear here when the desk selects them for public release.</p></section>
 <section class="card" style="margin-top:24px"><h2>Using a published indicator</h2><ol><li>Open its source and copy it.</li><li>In TradingView, open the Pine Editor, paste, and save.</li><li>Add it to your chart and read its settings and instructions.</li></ol>
 <p class="muted">If copying is unavailable, select the source text manually. Examples are labeled as screenshots or illustrations.</p></section></main>
@@ -73,7 +73,7 @@
   if ($('performance-chart')) {
     const mode = $('chart-mode'), view = $('chart-view'), range = $('chart-range'), slider = $('chart-point');
     const svg = $('performance-chart');
-    let points = [], X, Y;
+    let points = [], X, Y, chartWidth = 960, chartLeft = 100, chartPlot = 836;
     function explore() {
       if (!points.length) return;
       const index = Math.max(0,Math.min(points.length-1,Number(slider.value)));
@@ -100,25 +100,30 @@
       }
       const n = points.reduce((sum,p)=>sum+p.n,0), settled = points.reduce((sum,p)=>sum+p.settled,0);
       $('chart-context').textContent = `${points[0].date} to ${points.at(-1).date} · ${points.length} fill sessions · ${n} closed trades · ${settled === n ? 'Net after fees' : settled === 0 ? 'Gross before fees' : 'Mixed net/gross basis'}. Use the slider or tap the chart to explore.`;
+      chartWidth = Math.max(320,Math.min(960,svg.clientWidth || 960));
+      chartLeft = chartWidth < 650 ? 76 : 100;
+      const chartRight = chartWidth-24;
+      chartPlot = chartRight-chartLeft;
+      svg.setAttribute('viewBox',`0 0 ${chartWidth} 290`);
       let low = Math.min(...points.map(p=>p.value)), high = Math.max(...points.map(p=>p.value));
       if (view.value === 'daily' || mode.value === 'live') { low = Math.min(low,0); high = Math.max(high,0); }
       const span = high-low || 100;
       low -= span*.12; high += span*.12;
-      X = i => 100 + (points.length === 1 ? .5 : i/(points.length-1))*836;
+      X = i => chartLeft + (points.length === 1 ? .5 : i/(points.length-1))*chartPlot;
       Y = value => 18 + (1-(value-low)/(high-low))*226;
       let drawing = '';
       for(let i=0;i<4;i++) {
         const v = low+(high-low)*i/3, y = Y(v);
-        drawing += `<line x1="100" x2="936" y1="${y}" y2="${y}" stroke="#dce1d7"/><text x="88" y="${y+4}" text-anchor="end">${money(Math.round(v))}</text>`;
+        drawing += `<line x1="${chartLeft}" x2="${chartRight}" y1="${y}" y2="${y}" stroke="#dce1d7"/><text x="${chartLeft-12}" y="${y+4}" text-anchor="end">${money(Math.round(v))}</text>`;
       }
-      if (low<=0 && high>=0) drawing += `<line x1="100" x2="936" y1="${Y(0)}" y2="${Y(0)}" stroke="#667366" stroke-dasharray="4 4"/>`;
+      if (low<=0 && high>=0) drawing += `<line x1="${chartLeft}" x2="${chartRight}" y1="${Y(0)}" y2="${Y(0)}" stroke="#667366" stroke-dasharray="4 4"/>`;
       if (view.value === 'daily') {
-        const width = Math.min(36,700/points.length);
+        const width = Math.min(36,chartPlot*.8/points.length);
         drawing += points.map((p,i)=>`<rect x="${X(i)-width/2}" y="${Math.min(Y(p.value),Y(0))}" width="${width}" height="${Math.max(1,Math.abs(Y(p.value)-Y(0)))}" rx="3" fill="${p.value < 0 ? '#a04438' : '#286e4c'}"/>`).join('');
       } else {
         drawing += `<path d="${points.map((p,i)=>`${i ? 'L':'M'} ${X(i)} ${Y(p.value)}`).join(' ')}" fill="none" stroke="#286e4c" stroke-width="3" stroke-linejoin="round"/>`;
       }
-      drawing += `<circle id="chart-cursor" cx="0" cy="0" r="6" fill="#16372b" stroke="#fffefa" stroke-width="2"/><text x="100" y="275">${points[0].date}</text><text x="936" y="275" text-anchor="end">${points.at(-1).date}</text>`;
+      drawing += `<circle id="chart-cursor" cx="0" cy="0" r="6" fill="#16372b" stroke="#fffefa" stroke-width="2"/><text x="${chartLeft}" y="275">${points[0].date}</text><text x="${chartRight}" y="275" text-anchor="end">${points.at(-1).date}</text>`;
       svg.innerHTML = drawing;
       $('chart-values').innerHTML = `<table><caption>Chart values for the selected account and range</caption><thead><tr><th>Session</th><th class="num">Daily result</th><th class="num">${mode.value === 'paper' ? 'Paper balance' : 'Cumulative result'}</th><th class="num">Trades</th></tr></thead><tbody>${points.map(p=>`<tr><td>${p.date}</td><td class="num">${money(p.net,true)}</td><td class="num">${money(p.cumulative)}</td><td class="num">${p.n}</td></tr>`).join('')}</tbody></table>`;
       explore();
@@ -128,9 +133,15 @@
     svg.addEventListener('click',event=>{
       if (!points.length) return;
       const box = svg.getBoundingClientRect();
-      const x = (event.clientX-box.left)/box.width*960;
-      slider.value = String(Math.max(0,Math.min(points.length-1,Math.round((x-100)/836*(points.length-1)))));
+      const x = (event.clientX-box.left)/box.width*chartWidth;
+      slider.value = String(Math.max(0,Math.min(points.length-1,Math.round((x-chartLeft)/chartPlot*(points.length-1)))));
       explore();
+    });
+    window.addEventListener('resize',()=>{
+      const selected = points[Number(slider.value)]?.date;
+      draw();
+      const index = points.findIndex(p=>p.date === selected);
+      if (index >= 0) { slider.value=String(index); explore(); }
     });
     draw();
   }
